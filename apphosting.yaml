@@ -1,0 +1,16 @@
+# Firebase App Hosting config (runs the Next.js app on Cloud Run).
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+runConfig:
+  minInstances: 0   # scale to zero, free when idle
+  maxInstances: 4
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: GCP_PROJECT_ID
+    value: REPLACE_WITH_PROJECT_ID
+  - variable: VERTEX_REGION
+    value: global
+  - variable: CLAUDE_MODEL
+    value: claude-sonnet-5
