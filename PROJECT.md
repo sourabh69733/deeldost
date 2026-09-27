@@ -227,7 +227,8 @@ firestore.rules                deny-all client rules
 - ✅ Rate calculator with copy-as-text rate card
 - ✅ Brand check: rules + domain age + Claude with fallback
 - ✅ Brand check from a DM screenshot (Claude reads the image; verify on live Vertex after first deploy)
-- ⬜ Rate limit `/api/check-brand` per IP
+- ✅ Rate limit `/api/check-brand`: 10 checks/hour per hashed IP, Firestore TTL cleans up
+- ⬜ After first deploy: log `x-forwarded-for` once and set `TRUSTED_PROXY_HOPS` so the limit can't be bypassed
 - ⬜ "Is this pay fair?" when the message mentions a price
 - ⬜ Rule: unrealistic pay for the creator's size
 - ⬜ Shareable rate card image (`next/og`)

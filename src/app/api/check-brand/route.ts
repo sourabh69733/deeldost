@@ -2,11 +2,22 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { BrandCheckError, BrandCheckInput, runBrandCheck } from "@/lib/brand-check";
 import { COLLECTIONS, getDb } from "@/lib/server/gcp";
+import { allowRequest } from "@/lib/server/rate-limit";
+
+// Each check can call Claude up to twice, so cap it per visitor.
+const CHECKS_PER_HOUR = 10;
 
 export async function POST(req: Request) {
   const parsed = BrandCheckInput.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
+  }
+
+  if (!(await allowRequest("check-brand", req, CHECKS_PER_HOUR))) {
+    return NextResponse.json(
+      { error: `You've done ${CHECKS_PER_HOUR} checks this hour. Please try again in a little while.` },
+      { status: 429 },
+    );
   }
 
   let result;

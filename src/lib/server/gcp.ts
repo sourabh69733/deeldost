@@ -39,4 +39,5 @@ export function getClaude(): AnthropicVertex | null {
 export const COLLECTIONS = {
   waitlist: "waitlist",
   brandChecks: "brandChecks",
+  rateLimits: "rateLimits",
 } as const;
