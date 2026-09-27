@@ -29,6 +29,13 @@ describe("runRedFlags", () => {
     expect(runRedFlags("We would love to work with you on a paid reel.", "Nykaa").map((f) => f.id)).toContain("no_website");
   });
 
+  it("counts a bare domain in the message as a website, but not an email domain", () => {
+    const noSite = (msg: string) => runRedFlags(msg, "GlowCo").some((f) => f.id === "no_website");
+    expect(noSite("Check us out at glowco.in for details")).toBe(false);
+    expect(noSite("Visit www.glowco.co.in today")).toBe(false);
+    expect(noSite("Email me at glowco.team@gmail.com")).toBe(true);
+  });
+
   it("stays quiet on a normal, clean offer", () => {
     expect(ids("We would love a paid reel for our new serum. Budget is ₹15,000, paid 50% upfront. Contract attached.")).toEqual([]);
   });

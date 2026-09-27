@@ -20,6 +20,9 @@ const RULES: { id: string; severity: Flag["severity"]; reason: string; test: Reg
     test: /(like|follow|subscribe|review)\s*(and|&)\s*earn|daily\s*income|per\s*task|work\s*from\s*home\s*earn/i },
 ];
 
+// A link or bare domain like "brand.in", but not the domain part of an email address.
+const WEBSITE_IN_TEXT = /https?:\/\/|(?<![@\w.-])[a-z0-9-]+(\.[a-z0-9-]+)*\.(com|in|co|shop|store|net|org|io|app|online|site)\b/i;
+
 const FREE_EMAIL = /@(gmail|yahoo|outlook|hotmail|rediffmail|proton(mail)?|icloud)\.(com|in|me)/i;
 
 export function runRedFlags(message: string, brandName: string, website?: string): Flag[] {
@@ -31,7 +34,7 @@ export function runRedFlags(message: string, brandName: string, website?: string
       reason: `The message uses a free email address (like Gmail) while claiming to be ${brandName}. Big brands and agencies usually use their own company email.`,
     });
   }
-  if (!website && !/https?:\/\//i.test(message)) {
+  if (!website && !WEBSITE_IN_TEXT.test(message)) {
     flags.push({ id: "no_website", severity: "medium", reason: "No brand website was shared. Ask for one before agreeing." });
   }
   return flags;
