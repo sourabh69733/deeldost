@@ -41,4 +41,5 @@ export const COLLECTIONS = {
   brandChecks: "brandChecks",
   rateLimits: "rateLimits",
   dealReports: "dealReports",
+  metrics: "metrics",
 } as const;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
 import { COLLECTIONS, getDb } from "@/lib/server/gcp";
+import { countEvent } from "@/lib/server/metrics";
 
 const Input = z.object({ email: z.string().trim().toLowerCase().email("Enter a valid email") });
 
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
       { email, createdAt: FieldValue.serverTimestamp() },
       { merge: true },
     );
+    await countEvent("waitlist_join");
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[waitlist] save failed", e);

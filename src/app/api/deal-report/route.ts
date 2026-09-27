@@ -5,6 +5,7 @@ import { DELIVERABLES } from "@/lib/pricing/config";
 import { DealReportInput } from "@/lib/pricing/deal-report";
 import { COLLECTIONS, getDb } from "@/lib/server/gcp";
 import { allowRequest } from "@/lib/server/rate-limit";
+import { countEvent } from "@/lib/server/metrics";
 
 const REPORTS_PER_HOUR = 5;
 
@@ -40,5 +41,6 @@ export async function POST(req: Request) {
     }
   }
 
+  await countEvent("deal_report");
   return NextResponse.json({ ok: true, fair, ratio });
 }

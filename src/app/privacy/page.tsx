@@ -47,6 +47,11 @@ export default function PrivacyPage() {
       <h2>Where data lives</h2>
       <p>Stored data is kept in Google Cloud in Mumbai, India. We don&apos;t sell your data or share it for advertising.</p>
 
+      <h2>Usage counts</h2>
+      <p>
+        We count how often pages are visited and tools are used, as daily totals only. No cookies, and nothing is linked to you.
+      </p>
+
       <h2>Cookies</h2>
       <p>We don&apos;t use tracking or advertising cookies.</p>
 

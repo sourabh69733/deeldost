@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ADD_ONS, AddOn, DELIVERABLES, Deliverable, NICHES, Niche, Platform } from "@/lib/pricing/config";
 import { calculateRate } from "@/lib/pricing/calculate";
 import { inr } from "@/lib/format";
 import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
 import { rateCardQuery } from "@/lib/pricing/rate-card";
 import DealReportForm from "./DealReportForm";
+import { track } from "@/lib/analytics/track";
 
 const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
 
@@ -41,6 +42,12 @@ export default function RateCalculator() {
     [ready, deliverable, f, v, niche, addOns],
   );
 
+  // Count one calculation per visit, not every keystroke.
+  const counted = useRef(false);
+  useEffect(() => {
+    if (result && !counted.current) { counted.current = true; track("rate_calculated"); }
+  }, [result]);
+
   function switchPlatform(p: Platform) {
     setPlatform(p);
     setDeliverable(p === "instagram" ? "reel" : "yt_integration");
@@ -60,10 +67,12 @@ export default function RateCalculator() {
       const file = new File([blob], "rate-card.png", { type: "image/png" });
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: "My rate card" });
+        track("card_shared");
       } else {
         const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "rate-card.png" });
         a.click();
         URL.revokeObjectURL(a.href);
+        track("card_shared");
       }
     } catch {
       /* share sheet closed or download blocked: nothing to do */
@@ -84,6 +93,7 @@ export default function RateCalculator() {
       `Payment: 50% advance, 50% on posting. Rates exclude GST.`,
     ];
     await navigator.clipboard.writeText(lines.join("\n"));
+    track("card_copied");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
