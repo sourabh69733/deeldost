@@ -20,6 +20,7 @@ Node 22 (`nvm use`). No API keys; auth is Google Application Default Credentials
 - Rules first, AI second: every feature works if AI fails
 - AI calls and secrets server-side only
 - Never store pasted messages or full emails
+- If you change what data is collected or stored, update src/app/privacy/page.tsx and SITE.legalUpdated in src/lib/site.ts
 - Never auto-send messages on the user's behalf
 - Mobile-first, plain English, INR via src/lib/format.ts
 - Logic in src/lib with a test next to it; pages and components stay thin

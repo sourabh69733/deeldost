@@ -234,7 +234,8 @@ firestore.rules                deny-all client rules
 - ⬜ Shareable rate card image (`next/og`)
 - ⬜ "What were you actually paid?" feedback → `dealReports`
 - ⬜ Analytics (GA4)
-- ⬜ Privacy policy + terms pages (also needed for Meta review)
+- ✅ Privacy + terms pages (`/privacy`, `/terms`), footer links
+- ⬜ Set contact email in `src/lib/site.ts` and have a lawyer review privacy + terms before launch
 - ⬜ Launch to 20 to 50 creators, tune pricing
 
 ### Phase 2: Connect Instagram
