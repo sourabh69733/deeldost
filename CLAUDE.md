@@ -17,11 +17,16 @@ Node 22 (`nvm use`). No API keys; auth is Google Application Default Credentials
 - Brand check pipeline: src/lib/brand-check/index.ts
 - Usage events: src/lib/analytics/events.ts (add new event names here)
 - Rate card image: src/app/api/rate-card/route.tsx
+- Signed-in user: getCurrentUser() in src/lib/server/session.ts
+- Instagram: src/lib/instagram/ (api = all Meta endpoints, store = Firestore layout, sync = refresh)
+- Media kit: src/lib/kit/, page at src/app/kit/[username]
 
 ## Rules
 - Rules first, AI second: every feature works if AI fails
 - AI calls and secrets server-side only
 - Never store pasted messages or full emails
+- Never store raw Instagram tokens: always encrypt via src/lib/server/crypto.ts
+- Firestore can't store nested arrays: use arrays of objects
 - If you change what data is collected or stored, update src/app/privacy/page.tsx and SITE.legalUpdated in src/lib/site.ts
 - Never auto-send messages on the user's behalf
 - Mobile-first, plain English, INR via src/lib/format.ts

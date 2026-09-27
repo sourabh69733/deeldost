@@ -142,7 +142,7 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | Queue | Pub/Sub | Absorbs comment spikes on viral posts |
 | Jobs | Cloud Scheduler | Daily insights, reminders |
 | Login | Firebase Auth (Google) + Instagram Login | Google for the account, Instagram for data access |
-| Secrets | Secret Manager | Meta app secret, Instagram tokens |
+| Secrets | Secret Manager | Meta app secret, token encryption key (`dealdost-*`) |
 | AI | Claude on Vertex AI | GCP billing, service-account auth |
 | Validation | zod | Every API input and every AI output |
 | Tests | Vitest | Fast, zero config |
@@ -157,7 +157,11 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | `dealReports/{id}` | platform, deliverable, niche, followers, avgViews, addOns, paid, fairAtTime, ratio | 1 ✅ |
 | `metrics/{YYYY-MM-DD}` | one counter per event (views, checks, shares, reports), India time | 1 ✅ |
 | `rateLimits/{id}` | count, expireAt (TTL) | 1 ✅ |
-| `users/{uid}` | name, niche, igUserId, plan, createdAt | 2 |
+| `users/{uid}` | name, email, picture, createdAt, lastLoginAt, `instagram` {igUserId, username, picture, connectedAt, needsReconnect}, `kit` {public, niche} | 2 ✅ |
+| `users/{uid}/private/instagram` | tokenEnc (AES-GCM), expiresAt, refreshedAt, permissions. Server only | 2 ✅ |
+| `users/{uid}/stats/instagram` | followers, avgViews (median), reelsCounted, engagementRate, audience {cities, countries, age, gender: [{label, share}]}, refreshedAt | 2 ✅ |
+| `igAccounts/{igUserId}` | uid (one Instagram account ↔ one user; webhooks use it) | 2 ✅ |
+| `oauthStates/{state}` | uid, expireAt (TTL) | 2 ✅ |
 | `users/{uid}/deals/{id}` | brandId, source (dm/comment/paste), status, offer, deliverables, fairPrice, risk, dueDate, paidAt | 3 |
 | `users/{uid}/insightsDaily/{date}` | reach, views, category counts, top questions, bot share | 3 |
 | `brands/{brandId}` | name, handle, domain, domainAgeDays, reportCount, avgPaid, onTimeRate | 4 |
@@ -189,7 +193,10 @@ src/
     analytics/                 event names, browser track()
     pricing/                   config (numbers), calculate (math), rate-card, deal-report, tests
     brand-check/               red-flags, domain-check, pay-check, ai-review, read-screenshot, index (pipeline), tests
-    instagram/                 (Phase 2) OAuth, API client, webhook handling
+    auth/client.ts             browser Google sign-in → session cookie
+    server/session.ts          read the signed-in user; server/crypto.ts token encryption
+    instagram/                 config, api (typed client), store (Firestore), sync, stats, numbers
+    kit/                       media kit settings + public lookup
     inbox/                     (Phase 3) filters, categoriser, deal extractor
     insights/                  (Phase 3) daily aggregation
 scripts/metrics.mjs            `npm run metrics`: daily usage table
@@ -246,14 +253,19 @@ firestore.rules                deny-all client rules
 - ⬜ Launch to 20 to 50 creators, tune pricing
 
 ### Phase 2: Connect Instagram
+- ✅ Google sign-in (Firebase Auth → 14-day httpOnly `__session` cookie, CSRF origin check, account page)
+- ⬜ Owner: Firebase console → Authentication → enable Google provider (needed before sign-in works)
+- ✅ Instagram Login: connect / callback / refresh / disconnect, one-time server-side state
+- ✅ Tokens AES-GCM encrypted in Firestore, key in Secret Manager (`dealdost-token-encryption-key`), see D11
+- ✅ Stats sync: profile, median views of last 12 reels, engagement, follower demographics
+- ✅ Rate calculator + brand checker pre-filled from real Instagram numbers
+- ✅ Media kit: `/kit/<username>`, off by default, noindex, rate card as link preview
+- ⬜ Owner: create Meta **Business** app, add Instagram product ("API setup with Instagram login"), add yourself as Instagram tester
+- ⬜ Set `INSTAGRAM_APP_ID` + `APP_URL` in `apphosting.yaml`, app secret in `dealdost-instagram-app-secret`, redirect URI `<APP_URL>/api/instagram/callback` in Meta
+- ⬜ First real connect with a tester account; verify metrics names against live API
+- ⬜ Daily stats refresh (Cloud Scheduler) so tokens and kits stay fresh
 - ⬜ Register business for Meta verification (see D9)
-- ⬜ Build and test Instagram features with tester accounts (development mode)
-- ⬜ Create Meta app, business verification
-- ⬜ Firebase Auth (Google sign-in)
-- ⬜ Instagram Login + token storage in Secret Manager
-- ⬜ Pull profile, reach, audience → auto-fill rate calculator
-- ⬜ Media kit page
-- ⬜ App Review: basic + insights
+- ⬜ App Review: `instagram_business_basic` + `instagram_business_manage_insights` (needs privacy URL, screencast, data deletion instructions)
 
 ### Phase 3: Inbox + Insights (paid)
 - ⬜ App Review: comments + messages
@@ -285,6 +297,8 @@ firestore.rules                deny-all client rules
 | D5 | Never store raw messages | Privacy, DPDP Act | 2026-09-27 |
 | D6 | Instagram first, Gmail later | Creators get most offers in Instagram DMs; Gmail read access is a restricted scope with a yearly paid audit | 2026-09-27 |
 | D7 | Official Meta API only, no scraping | Scraping breaks Meta terms and risks creator accounts | 2026-09-27 |
+| D11 | Encrypt Instagram tokens with one app key (Secret Manager) and store them in Firestore | One secret per user in Secret Manager costs more and scales worse; AES-GCM with a single key is standard and cheap | 2026-09-27 |
+| D12 | "Typical views" = median of the last 12 reels | One viral reel shouldn't inflate a creator's price or media kit | 2026-09-27 |
 | D10 | Cookie-free first-party counters instead of GA4 for now | No consent banner, matches our privacy promise, enough for Phase 1 targets. Can't count unique visitors; revisit GA4 when we need funnels | 2026-09-27 |
 | D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
