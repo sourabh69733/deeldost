@@ -11,7 +11,7 @@ describe("median", () => {
 
 describe("topShares", () => {
   it("returns the largest groups as shares of the total", () => {
-    expect(topShares([["Pune", 10], ["Mumbai", 30], ["Delhi", 60]], 2)).toEqual([["Delhi", 0.6], ["Mumbai", 0.3]]);
+    expect(topShares([["Pune", 10], ["Mumbai", 30], ["Delhi", 60]], 2)).toEqual([{ label: "Delhi", share: 0.6 }, { label: "Mumbai", share: 0.3 }]);
     expect(topShares([])).toEqual([]);
   });
 });
@@ -46,7 +46,15 @@ describe("computeStats", () => {
       age: [["18-24", 600], ["25-34", 400]],
       gender: [["F", 700], ["M", 300]],
     });
-    expect(s.audience?.cities[0]).toEqual(["Delhi", 0.7]);
-    expect(s.audience?.gender).toEqual([["F", 0.7], ["M", 0.3]]);
+    expect(s.audience?.cities[0]).toEqual({ label: "Delhi", share: 0.7 });
+    expect(s.audience?.gender).toEqual([{ label: "F", share: 0.7 }, { label: "M", share: 0.3 }]);
+  });
+
+  it("never produces nested arrays (Firestore rejects them)", () => {
+    const hasNested = (v: unknown): boolean =>
+      Array.isArray(v) ? v.some((x) => Array.isArray(x) || hasNested(x))
+      : v !== null && typeof v === "object" ? Object.values(v).some(hasNested) : false;
+    const s = computeStats(50_000, reels, { city: [["A", 1]], country: [["IN", 1]], age: [["18-24", 1]], gender: [["F", 1]] });
+    expect(hasNested(s)).toBe(false);
   });
 });

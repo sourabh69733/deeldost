@@ -2,6 +2,9 @@
 
 export type ReelSample = { views: number; likes: number; comments: number };
 
+/** One audience group and its share of followers (0..1). Objects, because Firestore can't store nested arrays. */
+export type Share = { label: string; share: number };
+
 export type InstagramStats = {
   followers: number;
   /** Median views of recent reels. Median, so one viral reel doesn't inflate prices. */
@@ -10,10 +13,10 @@ export type InstagramStats = {
   /** Median (likes + comments) / views across recent reels, e.g. 0.042 = 4.2%. */
   engagementRate: number | null;
   audience: {
-    cities: [string, number][];
-    countries: [string, number][];
-    age: [string, number][];
-    gender: [string, number][];
+    cities: Share[];
+    countries: Share[];
+    age: Share[];
+    gender: Share[];
   } | null;
   refreshedAt: number;
 };
@@ -28,11 +31,11 @@ export function median(values: number[]): number | null {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
 
-/** Top N entries by count, largest first, as shares of the total (0..1). */
-export function topShares(rows: [string, number][], n = 5): [string, number][] {
+/** Top N groups by count, largest first, as shares of the total. */
+export function topShares(rows: [string, number][], n = 5): Share[] {
   const total = rows.reduce((sum, [, v]) => sum + v, 0);
   if (!total) return [];
-  return [...rows].sort((a, b) => b[1] - a[1]).slice(0, n).map(([k, v]) => [k, Math.round((v / total) * 1000) / 1000]);
+  return [...rows].sort((a, b) => b[1] - a[1]).slice(0, n).map(([label, v]) => ({ label, share: Math.round((v / total) * 1000) / 1000 }));
 }
 
 export function computeStats(

@@ -53,6 +53,11 @@ export default function PrivacyPage() {
         send messages for you. Disconnect any time from your account page: we delete the key and your Instagram numbers straight away.
         You can also remove DealDost in Instagram under Settings, then Apps and websites.
       </p>
+      <p>
+        <strong>Media kit:</strong> off by default. If you turn on your public link, anyone with it can see your username,
+        photo, niche, follower and view numbers, audience breakdown and rates. It is hidden from search engines, and turning it
+        off hides it immediately.
+      </p>
 
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>

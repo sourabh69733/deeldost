@@ -3,6 +3,7 @@ import { compact } from "@/lib/format";
 import type { InstagramStats } from "@/lib/instagram/stats";
 import type { InstagramSummary } from "@/lib/instagram/store";
 import InstagramActions from "./InstagramActions";
+import { AudienceBreakdown, Stat } from "./StatBlocks";
 
 // Messages for /account?ig=... after the connect flow.
 const NOTICES: Record<string, { text: string; ok?: boolean }> = {
@@ -14,9 +15,6 @@ const NOTICES: Record<string, { text: string; ok?: boolean }> = {
   signin: { text: "Please sign in first." },
   error: { text: "Something went wrong connecting Instagram. Please try again." },
 };
-
-const pct = (share: number) => `${Math.round(share * 100)}%`;
-const GENDER: Record<string, string> = { F: "Women", M: "Men", U: "Other" };
 
 type Props = { configured: boolean; summary: InstagramSummary | null; stats: InstagramStats | null; notice?: string };
 
@@ -58,11 +56,7 @@ export default function InstagramCard({ configured, summary, stats, notice }: Pr
               </p>
 
               {stats.audience && (
-                <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                  <Top title="Top cities" rows={stats.audience.cities} />
-                  <Top title="Age" rows={stats.audience.age} />
-                  <Top title="Gender" rows={stats.audience.gender.map(([k, v]) => [GENDER[k] ?? k, v])} />
-                </div>
+                <div className="mt-5"><AudienceBreakdown audience={stats.audience} /></div>
               )}
 
               <Link href="/rate" className="mt-5 inline-block font-semibold underline">Price a deal with these numbers →</Link>
@@ -78,23 +72,3 @@ export default function InstagramCard({ configured, summary, stats, notice }: Pr
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg px-1 py-3" style={{ background: "var(--paper)" }}>
-      <dt className="text-xs sm:text-sm" style={{ color: "var(--muted)" }}>{label}</dt>
-      <dd className="display text-2xl font-extrabold">{value}</dd>
-    </div>
-  );
-}
-
-function Top({ title, rows }: { title: string; rows: [string, number][] }) {
-  if (!rows.length) return null;
-  return (
-    <div>
-      <h3 className="font-semibold">{title}</h3>
-      <ul className="mt-1 space-y-0.5 text-sm">
-        {rows.map(([k, v]) => <li key={k} className="flex justify-between gap-2"><span className="truncate">{k}</span><span>{pct(v)}</span></li>)}
-      </ul>
-    </div>
-  );
-}

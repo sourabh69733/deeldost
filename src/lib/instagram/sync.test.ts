@@ -41,7 +41,7 @@ describe("syncStats", () => {
     expect(api.getMediaInsights).toHaveBeenCalledTimes(3);
     expect(stats.reelsCounted).toBe(2);
     expect(stats.avgViews).toBe(11_000);
-    expect(stats.audience?.cities[0]).toEqual(["Mumbai", 0.7]);
+    expect(stats.audience?.cities[0]).toEqual({ label: "Mumbai", share: 0.7 });
     expect(store.saveStats).toHaveBeenCalledWith("u1", stats, profile);
   });
 

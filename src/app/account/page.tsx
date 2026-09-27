@@ -3,6 +3,8 @@ import { igAppConfig } from "@/lib/instagram/config";
 import { getStats, getSummary } from "@/lib/instagram/store";
 import { SignInButton, SignOutButton } from "@/components/AuthButtons";
 import InstagramCard from "@/components/InstagramCard";
+import KitSettingsForm from "@/components/KitSettingsForm";
+import { getKitSettings } from "@/lib/kit/store";
 
 export const metadata = { title: "Account — DealDost" };
 
@@ -22,7 +24,7 @@ export default async function AccountPage({ searchParams }: { searchParams: { ig
     );
   }
 
-  const [summary, stats] = await Promise.all([getSummary(user.uid), getStats(user.uid)]);
+  const [summary, stats, kit] = await Promise.all([getSummary(user.uid), getStats(user.uid), getKitSettings(user.uid)]);
 
   return (
     <section className="pt-6">
@@ -30,6 +32,14 @@ export default async function AccountPage({ searchParams }: { searchParams: { ig
       <p className="mt-2" style={{ color: "var(--muted)" }}>{user.email}</p>
 
       <InstagramCard configured={!!igAppConfig()} summary={summary} stats={stats} notice={searchParams.ig} />
+
+      {summary && stats?.avgViews ? (
+        <section className="mt-10 rounded-xl border-2 p-6" style={{ borderColor: "var(--line)", background: "#fff" }}>
+          <h2 className="text-xl font-bold">Media kit</h2>
+          <p className="mt-1">A one-page link for brands with your real numbers, audience and rates.</p>
+          <KitSettingsForm initial={kit} username={summary.username} />
+        </section>
+      ) : null}
 
       <div className="mt-10"><SignOutButton /></div>
     </section>
