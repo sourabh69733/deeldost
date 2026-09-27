@@ -5,6 +5,7 @@ import { calculateRate } from "@/lib/pricing/calculate";
 import { inr } from "@/lib/format";
 import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
 import { rateCardQuery } from "@/lib/pricing/rate-card";
+import DealReportForm from "./DealReportForm";
 
 const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
 
@@ -164,6 +165,9 @@ export default function RateCalculator() {
             <div className="mt-4 flex flex-wrap gap-3">
               <button className="btn" onClick={shareImage} disabled={sharing}>{sharing ? "Making image…" : "Share rate card image"}</button>
               <button className="btn btn-ghost" onClick={copyCard}>{copied ? "Copied" : "Copy as text"}</button>
+            </div>
+            <div className="mt-8 border-t pt-6" style={{ borderColor: "var(--line)" }}>
+              <DealReportForm deliverable={deliverable} followers={f} avgViews={v} niche={niche} addOns={addOns} />
             </div>
             <p className="hint mt-6">Estimates only. Your real rate depends on your audience, content quality and the brand.</p>
           </div>

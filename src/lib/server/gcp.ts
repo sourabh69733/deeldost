@@ -40,4 +40,5 @@ export const COLLECTIONS = {
   waitlist: "waitlist",
   brandChecks: "brandChecks",
   rateLimits: "rateLimits",
+  dealReports: "dealReports",
 } as const;

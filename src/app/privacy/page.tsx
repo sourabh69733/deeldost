@@ -29,6 +29,12 @@ export default function PrivacyPage() {
         <li><strong>Website check:</strong> if you give a website, we visit it and look up its registration date through rdap.org.</li>
       </ul>
 
+      <h2>Deal reports</h2>
+      <p>
+        If you tell us what a deal paid, we store the numbers from the calculator (platform, deliverable, niche, followers,
+        average views, add-ons) and the amount. No name, handle or brand. We use these to make price estimates more accurate.
+      </p>
+
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>
 
