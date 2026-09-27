@@ -1,7 +1,45 @@
 # DealDost: Project Plan and Progress
 
-The one file for direction and progress. Tick items in **section 7** as work lands.
+The one file for direction and progress. Owner actions are in **Owner to-do** below; build progress is in **section 7**.
 Last updated: 2026-09-27
+
+---
+
+## Owner to-do
+
+Things only the owner can do (accounts, payments, legal). Tick them here; Claude picks up the "then" step.
+
+### Now (unblocks testing and launch)
+- [ ] **Turn on Google sign-in**: Firebase console → Authentication → Get started → Sign-in method → Google → Enable, pick a support email.
+  *Then:* Claude tests real sign-in end to end.
+- [ ] **Raise Claude quota**: Google Cloud console → IAM & Admin → Quotas → `global_online_prediction_requests_per_base_model`, model `anthropic-claude-sonnet` → request 30+/min.
+  *Then:* Claude tests AI brand check and screenshot reading live.
+- [ ] **Create App Hosting backend**: Firebase console → App Hosting → Create backend → GitHub `sourabh69733/deeldost`, branch `main`, region nearest India. Share the backend URL.
+  *Then:* Claude sets `APP_URL`, grants the service account Vertex AI User, Cloud Datastore User and access to `dealdost-*` secrets, checks the first deploy and sets `TRUSTED_PROXY_HOPS`.
+- [ ] **Set a budget alert** on project `omiryn` (Billing → Budgets & alerts), e.g. ₹2,000/month with 50/90/100% emails.
+- [ ] **Contact email** for the privacy and terms pages (ideally on your own domain).
+
+### Instagram (Phase 2)
+- [ ] **Create a Meta app**: developers.facebook.com → Create app → type **Business** → add **Instagram** → "API setup with Instagram login".
+- [ ] **Add yourself as Instagram tester** in the app, then accept the invite in Instagram (Settings → Apps and websites → Tester invites). Your account must be Creator or Business.
+- [ ] **Share the Instagram app ID** with Claude, and store the app secret yourself:
+  `printf 'SECRET' | gcloud secrets versions add dealdost-instagram-app-secret --project omiryn --data-file=-`
+- [ ] **Add redirect URI** in the Meta app: `<APP_URL>/api/instagram/callback` (after the backend exists).
+  *Then:* Claude runs the first real connect, checks metrics against the live API, adds the daily refresh.
+
+### Business and legal
+- [ ] **Pick and check the name**: search trademarks (ipindia.gov.in) and the `.in`/`.com` domain and Instagram handle.
+- [ ] **Buy the domain** and connect it to App Hosting (custom domain).
+- [ ] **Register the business**: Private Limited (MCA, 2 directors) or sole proprietorship + Udyam. Needed for Meta business verification.
+- [ ] **Meta business verification** once registered.
+- [ ] **Lawyer review** of `/privacy` and `/terms` before public launch.
+- [ ] **Meta App Review** for `instagram_business_basic` + `instagram_business_manage_insights` (needs public privacy URL, screencast, data deletion instructions). Claude prepares the screencast script and review notes.
+
+### Before public launch
+- [ ] **Clear test data** in Firestore (waitlist `setup-test@dealdost.test`, `TestBrand` check, one deal report, test metrics), or ask Claude to.
+- [ ] **Try on your phone** after deploy: share the rate card image to WhatsApp, sign in, connect Instagram, open your media kit link.
+- [ ] **Consider a dedicated GCP project**: `omiryn` also holds other apps' secrets; a separate project keeps DealDost's access and billing isolated.
+- [ ] **Launch** to 20 to 50 creators; after a few weeks ask Claude to tune prices from `dealReports`.
 
 ---
 
