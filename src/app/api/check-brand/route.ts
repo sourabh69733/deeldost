@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
-import { BrandCheckInput, runBrandCheck } from "@/lib/brand-check";
+import { BrandCheckError, BrandCheckInput, runBrandCheck } from "@/lib/brand-check";
 import { COLLECTIONS, getDb } from "@/lib/server/gcp";
 
 export async function POST(req: Request) {
@@ -9,15 +9,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
   }
 
-  const result = await runBrandCheck(parsed.data);
+  let result;
+  try {
+    result = await runBrandCheck(parsed.data);
+  } catch (e) {
+    if (e instanceof BrandCheckError) return NextResponse.json({ error: e.message }, { status: 422 });
+    throw e;
+  }
 
-  // Keep a light record for tuning rules. Never store the pasted message itself.
+  // Keep a light record for tuning rules. Never store the message or screenshot.
   const db = getDb();
   if (db) {
     await db.collection(COLLECTIONS.brandChecks).add({
-      brandName: parsed.data.brandName,
+      brandName: result.brandName,
       website: parsed.data.website || null,
       instagram: parsed.data.instagram || null,
+      source: parsed.data.screenshot ? "screenshot" : "paste",
       risk: result.risk,
       flagIds: result.flags.map((f) => f.id),
       usedAi: result.aiError === null,

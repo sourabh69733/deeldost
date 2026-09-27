@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
 import type { BrandCheckResult as Result } from "@/lib/brand-check/types";
+import { compressImage } from "@/lib/image";
+
+type Shot = { name: string; mediaType: "image/jpeg"; data: string };
 
 const VERDICT = {
   low: { title: "Looks OK", body: "No major warning signs. Still get the deal in writing.", color: "var(--leaf)", dot: "🟢" },
@@ -13,16 +16,29 @@ export default function BrandChecker() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [shot, setShot] = useState<Shot | null>(null);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
+
+  async function pickScreenshot(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      setShot({ name: file.name, ...(await compressImage(file)) });
+      setError("");
+    } catch {
+      setError("Couldn't open that image. Try a PNG or JPG screenshot.");
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(""); setResult(null);
     try {
       const res = await fetch("/api/check-brand", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, screenshot: shot ? { mediaType: shot.mediaType, data: shot.data } : undefined }),
       });
       const data = await res.json();
       if (!res.ok) setError(data.error ?? "Check failed. Try again.");
@@ -41,8 +57,8 @@ export default function BrandChecker() {
       <form onSubmit={submit} className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="brand" className="label">Brand name</label>
-            <input id="brand" required className="field" value={form.brandName} onChange={set("brandName")} />
+            <label htmlFor="brand" className="label">Brand name {shot && <span className="hint">(optional)</span>}</label>
+            <input id="brand" required={!shot} className="field" value={form.brandName} onChange={set("brandName")} />
           </div>
           <div>
             <label htmlFor="site" className="label">Website <span className="hint">(optional)</span></label>
@@ -54,9 +70,21 @@ export default function BrandChecker() {
           </div>
         </div>
         <div>
-          <label htmlFor="msg" className="label">Their message</label>
-          <textarea id="msg" required rows={7} className="field" value={form.message} onChange={set("message")}
+          <label htmlFor="msg" className="label">Their message {shot && <span className="hint">(optional)</span>}</label>
+          <textarea id="msg" required={!shot} rows={7} className="field" value={form.message} onChange={set("message")}
             placeholder="Paste the full DM, WhatsApp message or email here" />
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="hint">or</span>
+          <label className="btn btn-ghost cursor-pointer">
+            {shot ? "Change screenshot" : "Upload a screenshot"}
+            <input type="file" accept="image/*" className="sr-only" onChange={pickScreenshot} />
+          </label>
+          {shot && (
+            <span className="hint">
+              {shot.name} <button type="button" className="underline" onClick={() => setShot(null)}>remove</button>
+            </span>
+          )}
         </div>
         <button className="btn" disabled={loading}>{loading ? "Checking…" : "Check this brand"}</button>
         {error && <p style={{ color: "var(--chili)" }}>{error}</p>}
@@ -74,6 +102,13 @@ export default function BrandChecker() {
               <h2 className="mt-8 text-xl font-bold">What we noticed</h2>
               <ul className="mt-3 list-disc space-y-2 pl-5">{reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
             </>
+          )}
+
+          {result.readFromScreenshot && (
+            <details className="mt-6">
+              <summary className="cursor-pointer font-semibold">What we read from your screenshot</summary>
+              <p className="hint mt-2 whitespace-pre-wrap">{result.readFromScreenshot}</p>
+            </details>
           )}
 
           {result.domain && (
