@@ -215,8 +215,12 @@ firestore.rules                deny-all client rules
 - ✅ Unit tests (pricing, red flags, domain safety)
 - ✅ SSRF protection in domain check
 - ✅ Git repo with clean commit history
-- ⬜ Push to GitHub
-- ⬜ Create GCP project and first deploy (section 9)
+- ✅ Push to GitHub (`sourabh69733/deeldost`)
+- ✅ GCP project `omiryn`: billing, Vertex AI, Firebase added
+- ✅ Firestore (Native, `asia-south1`) + deny-all rules deployed; local writes verified
+- ⬜ Raise Vertex quota for Claude Sonnet (currently 0; owner action in console)
+- ⬜ App Hosting backend + GitHub link (owner action in Firebase console)
+- ⬜ Grant App Hosting service account **Vertex AI User** + **Cloud Datastore User**, then first deploy
 
 ### Phase 1: Free tools
 - ✅ Landing page + waitlist
@@ -233,7 +237,8 @@ firestore.rules                deny-all client rules
 - ⬜ Launch to 20 to 50 creators, tune pricing
 
 ### Phase 2: Connect Instagram
-- ⬜ Register business (GST / company) for Meta verification
+- ⬜ Register business for Meta verification (see D9)
+- ⬜ Build and test Instagram features with tester accounts (development mode)
 - ⬜ Create Meta app, business verification
 - ⬜ Firebase Auth (Google sign-in)
 - ⬜ Instagram Login + token storage in Secret Manager
@@ -271,6 +276,7 @@ firestore.rules                deny-all client rules
 | D5 | Never store raw messages | Privacy, DPDP Act | 2026-09-27 |
 | D6 | Instagram first, Gmail later | Creators get most offers in Instagram DMs; Gmail read access is a restricted scope with a yearly paid audit | 2026-09-27 |
 | D7 | Official Meta API only, no scraping | Scraping breaks Meta terms and risks creator accounts | 2026-09-27 |
+| D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
 
 ---
