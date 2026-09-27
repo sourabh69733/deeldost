@@ -35,6 +35,12 @@ export default function PrivacyPage() {
         average views, add-ons) and the amount. No name, handle or brand. We use these to make price estimates more accurate.
       </p>
 
+      <h2>Your account</h2>
+      <p>
+        Signing in is optional. If you sign in with Google, we store your name, email address and profile photo from Google,
+        and when you last signed in. A secure login cookie keeps you signed in for up to 14 days.
+      </p>
+
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>
 
@@ -53,7 +59,7 @@ export default function PrivacyPage() {
       </p>
 
       <h2>Cookies</h2>
-      <p>We don&apos;t use tracking or advertising cookies.</p>
+      <p>We don&apos;t use tracking or advertising cookies. The only cookie is the login cookie, set when you sign in.</p>
 
       <h2>Your rights</h2>
       <p>

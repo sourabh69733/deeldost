@@ -14,3 +14,13 @@ env:
     value: global
   - variable: CLAUDE_MODEL
     value: claude-sonnet-5
+  # Firebase web config is public; needed at build time for the browser bundle.
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyDjrGuTPFesXtnsgenKYXrtm2SdCal1BxA
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: omiryn.firebaseapp.com
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:66496865626:web:e00c2f1879836a10717f63"
+    availability: [BUILD, RUNTIME]

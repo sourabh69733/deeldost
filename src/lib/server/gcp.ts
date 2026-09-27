@@ -1,13 +1,14 @@
-// Server-only access to Google Cloud: Firestore (data) and Vertex AI (Claude).
+// Server-only access to Google Cloud: Firestore (data), Firebase Auth (login) and Vertex AI (Claude).
 //
 // Auth uses Application Default Credentials. No keys live in the code or env:
 // - Local: run `gcloud auth application-default login` once.
 // - Firebase App Hosting: the backend's service account is used automatically.
 //
-// If GCP_PROJECT_ID is not set, both getters return null and the app still works:
-// waitlist emails are logged, and the brand check uses rules only.
+// If GCP_PROJECT_ID is not set, the getters return null and the app still works:
+// waitlist emails are logged, the brand check uses rules only, and sign-in is unavailable.
 import "server-only";
-import { getApps, initializeApp } from "firebase-admin/app";
+import { getApps, initializeApp, type App } from "firebase-admin/app";
+import { getAuth, type Auth } from "firebase-admin/auth";
 import { Firestore, getFirestore } from "firebase-admin/firestore";
 import { AnthropicVertex } from "@anthropic-ai/vertex-sdk";
 
@@ -18,13 +19,20 @@ export const CLAUDE_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-5";
 let db: Firestore | null = null;
 let claude: AnthropicVertex | null = null;
 
-export function getDb(): Firestore | null {
+function adminApp(): App | null {
   if (!projectId) return null;
-  if (!db) {
-    const app = getApps()[0] ?? initializeApp({ projectId });
-    db = getFirestore(app);
-  }
+  return getApps()[0] ?? initializeApp({ projectId });
+}
+
+export function getDb(): Firestore | null {
+  const app = adminApp();
+  if (app && !db) db = getFirestore(app);
   return db;
+}
+
+export function getAdminAuth(): Auth | null {
+  const app = adminApp();
+  return app ? getAuth(app) : null;
 }
 
 export function getClaude(): AnthropicVertex | null {
@@ -42,4 +50,5 @@ export const COLLECTIONS = {
   rateLimits: "rateLimits",
   dealReports: "dealReports",
   metrics: "metrics",
+  users: "users",
 } as const;
