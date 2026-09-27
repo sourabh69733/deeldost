@@ -9,7 +9,7 @@ runConfig:
 
 env:
   - variable: GCP_PROJECT_ID
-    value: REPLACE_WITH_PROJECT_ID
+    value: omiryn
   - variable: VERTEX_REGION
     value: global
   - variable: CLAUDE_MODEL

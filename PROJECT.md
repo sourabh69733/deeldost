@@ -305,7 +305,7 @@ nvm use && npm install && npm run dev
 **Deploy:**
 1. Push the repo to GitHub.
 2. `firebase init apphosting`, connect the repo, pick the nearest region to India.
-3. Set `GCP_PROJECT_ID` in `apphosting.yaml`.
+3. `GCP_PROJECT_ID` is set to `omiryn` in `apphosting.yaml`.
 4. Give the App Hosting service account **Vertex AI User** and **Cloud Datastore User**.
 5. `firebase deploy --only firestore:rules`
 6. Push to `main` to deploy. Set a budget alert.
