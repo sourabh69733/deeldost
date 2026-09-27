@@ -11,13 +11,15 @@ const AiReview = z.object({
   risk: z.enum(["low", "medium", "high"]),
   reasons: z.array(z.string()),
   questions_to_ask_brand: z.array(z.string()),
+  offered_amount_inr: z.number().nullable(),
 });
 export type AiReview = z.infer<typeof AiReview>;
 
 const SYSTEM_PROMPT =
   "You help Indian social media creators judge whether a brand collaboration offer is genuine. " +
   "Be practical and plain-spoken, in simple English. Never claim certainty; talk about signals, not proof. " +
-  "Give 2-5 short reasons and 3-4 short questions the creator should ask the brand before agreeing.";
+  "Give 2-5 short reasons and 3-4 short questions the creator should ask the brand before agreeing. " +
+  "Set offered_amount_inr to the total payment the brand offers the creator in rupees, or null if none is stated.";
 
 export type AiReviewInput = {
   brandName: string;

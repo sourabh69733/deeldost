@@ -1,8 +1,9 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ADD_ONS, AddOn, DELIVERABLES, Deliverable, NICHES, Niche, Platform } from "@/lib/pricing/config";
 import { calculateRate } from "@/lib/pricing/calculate";
 import { inr } from "@/lib/format";
+import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
 
 const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
 
@@ -18,6 +19,18 @@ export default function RateCalculator() {
   const deliverables = (Object.keys(DELIVERABLES) as Deliverable[]).filter((d) => DELIVERABLES[d].platform === platform);
   const f = toNum(followers), v = toNum(avgViews);
   const ready = f > 0 && v > 0;
+
+  // Prefill from this device, and remember changes for the brand checker.
+  useEffect(() => {
+    const saved = loadCreatorProfile();
+    if (!saved) return;
+    setFollowers(String(saved.followers));
+    setAvgViews(String(saved.avgViews));
+    setNiche(saved.niche);
+  }, []);
+  useEffect(() => {
+    if (ready) saveCreatorProfile({ followers: f, avgViews: v, niche });
+  }, [ready, f, v, niche]);
 
   const result = useMemo(
     () => (ready ? calculateRate({ deliverable, followers: f, avgViews: v, niche, addOns }) : null),

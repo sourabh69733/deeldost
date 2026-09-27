@@ -5,6 +5,8 @@ import { checkDomain } from "./domain-check";
 import { runRedFlags, scoreRisk, type Risk } from "./red-flags";
 import { getAiReview } from "./ai-review";
 import { readScreenshot } from "./read-screenshot";
+import { TOO_GOOD_MULTIPLE, assessPay, extractOfferedAmount, guessDeliverable } from "./pay-check";
+import { inr } from "@/lib/format";
 import type { BrandCheckInput } from "./input";
 import type { BrandCheckResult } from "./types";
 
@@ -41,9 +43,22 @@ export async function runBrandCheck(input: BrandCheckInput): Promise<BrandCheckR
 
   const flags = runRedFlags(message, brandName, website);
   const domain = website ? await checkDomain(website) : null;
-  const ruleRisk = scoreRisk(flags, domain?.notes.length ?? 0);
-
   const ai = await getAiReview({ brandName, message, website, instagram, flags, domain });
+
+  // Rules find the amount first; AI fills in when the wording is unusual.
+  const offeredAmount = extractOfferedAmount(message) ?? ai?.offered_amount_inr ?? null;
+  const payCheck = offeredAmount && input.creator
+    ? assessPay(offeredAmount, guessDeliverable(message), input.creator)
+    : null;
+  if (payCheck?.verdict === "too_good") {
+    flags.push({
+      id: "too_good_pay",
+      severity: "medium",
+      reason: `They offer ${inr(payCheck.offered)}, more than ${TOO_GOOD_MULTIPLE}x the usual top rate for your size. Very high pay is often bait for a scam.`,
+    });
+  }
+
+  const ruleRisk = scoreRisk(flags, domain?.notes.length ?? 0);
 
   // AI can raise the risk level, but never lower what the rules found.
   const risk = ai && RISK_ORDER[ai.risk] > RISK_ORDER[ruleRisk] ? ai.risk : ruleRisk;
@@ -56,6 +71,8 @@ export async function runBrandCheck(input: BrandCheckInput): Promise<BrandCheckR
     aiReasons: ai?.reasons ?? [],
     questions: ai?.questions_to_ask_brand.length ? ai.questions_to_ask_brand : DEFAULT_QUESTIONS,
     aiError: ai ? null : "Showing rule-based results only (AI check not available right now).",
+    offeredAmount,
+    payCheck,
     readFromScreenshot,
   };
 }

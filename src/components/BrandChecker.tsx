@@ -1,9 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { BrandCheckResult as Result } from "@/lib/brand-check/types";
 import { compressImage } from "@/lib/image";
+import { inr } from "@/lib/format";
+import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
+import { DELIVERABLES, NICHES, type Niche } from "@/lib/pricing/config";
+import type { PayCheck } from "@/lib/brand-check/pay-check";
 
 type Shot = { name: string; mediaType: "image/jpeg"; data: string };
+
+const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
+
+const PAY_VERDICT: Record<PayCheck["verdict"], { title: string; tip: string; color: string }> = {
+  low: { title: "Low offer", tip: "You can ask for more. Share your rate card and quote the fair price.", color: "var(--chili)" },
+  fair: { title: "Fair offer", tip: "This is in your range. Get it in writing before you start.", color: "var(--leaf)" },
+  high: { title: "Good offer", tip: "Above your usual range. Great, as long as the brand checks out.", color: "var(--leaf)" },
+  too_good: { title: "Too good to be true?", tip: "Pay this high is often bait. Never pay anything upfront to get it.", color: "var(--marigold-deep)" },
+};
 
 const VERDICT = {
   low: { title: "Looks OK", body: "No major warning signs. Still get the deal in writing.", color: "var(--leaf)", dot: "🟢" },
@@ -17,6 +30,16 @@ export default function BrandChecker() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [shot, setShot] = useState<Shot | null>(null);
+  const [stats, setStats] = useState({ followers: "", avgViews: "", niche: "fashion" as Niche });
+
+  useEffect(() => {
+    const saved = loadCreatorProfile();
+    if (saved) setStats({ followers: String(saved.followers), avgViews: String(saved.avgViews), niche: saved.niche });
+  }, []);
+
+  const creator = toNum(stats.followers) > 0 && toNum(stats.avgViews) > 0
+    ? { followers: toNum(stats.followers), avgViews: toNum(stats.avgViews), niche: stats.niche }
+    : undefined;
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
@@ -36,9 +59,14 @@ export default function BrandChecker() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true); setError(""); setResult(null);
+    if (creator) saveCreatorProfile(creator);
     try {
       const res = await fetch("/api/check-brand", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, screenshot: shot ? { mediaType: shot.mediaType, data: shot.data } : undefined }),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+          ...form,
+          screenshot: shot ? { mediaType: shot.mediaType, data: shot.data } : undefined,
+          creator,
+        }),
       });
       const data = await res.json();
       if (!res.ok) setError(data.error ?? "Check failed. Try again.");
@@ -86,6 +114,30 @@ export default function BrandChecker() {
             </span>
           )}
         </div>
+        <details open={!creator}>
+          <summary className="cursor-pointer font-semibold">
+            Your numbers <span className="hint">(optional, to check if the pay is fair)</span>
+          </summary>
+          <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <div>
+              <label htmlFor="cc-followers" className="label">Followers</label>
+              <input id="cc-followers" inputMode="numeric" className="field" placeholder="50000"
+                value={stats.followers} onChange={(e) => setStats({ ...stats, followers: e.target.value })} />
+            </div>
+            <div>
+              <label htmlFor="cc-views" className="label">Avg. views</label>
+              <input id="cc-views" inputMode="numeric" className="field" placeholder="15000"
+                value={stats.avgViews} onChange={(e) => setStats({ ...stats, avgViews: e.target.value })} />
+            </div>
+            <div className="col-span-2 sm:col-span-1">
+              <label htmlFor="cc-niche" className="label">Niche</label>
+              <select id="cc-niche" className="field" value={stats.niche}
+                onChange={(e) => setStats({ ...stats, niche: e.target.value as Niche })}>
+                {(Object.keys(NICHES) as Niche[]).map((n) => <option key={n} value={n}>{NICHES[n].label}</option>)}
+              </select>
+            </div>
+          </div>
+        </details>
         <button className="btn" disabled={loading}>{loading ? "Checking…" : "Check this brand"}</button>
         {error && <p style={{ color: "var(--chili)" }}>{error}</p>}
       </form>
@@ -96,6 +148,23 @@ export default function BrandChecker() {
             {VERDICT[result.risk].dot} {VERDICT[result.risk].title}
           </p>
           <p className="mt-2">{VERDICT[result.risk].body}</p>
+
+          {result.payCheck ? (
+            <div className="mt-8 rounded-xl border-2 p-5" style={{ borderColor: PAY_VERDICT[result.payCheck.verdict].color }}>
+              <h2 className="text-xl font-bold" style={{ color: PAY_VERDICT[result.payCheck.verdict].color }}>
+                {PAY_VERDICT[result.payCheck.verdict].title}
+              </h2>
+              <p className="mt-2">
+                They offer <strong>{inr(result.payCheck.offered)}</strong>. For a {DELIVERABLES[result.payCheck.deliverable].label.toLowerCase()} at
+                your size, a fair price is <strong>{inr(result.payCheck.fair)}</strong> ({inr(result.payCheck.low)} to {inr(result.payCheck.high)}).
+              </p>
+              <p className="mt-2">{PAY_VERDICT[result.payCheck.verdict].tip}</p>
+            </div>
+          ) : result.offeredAmount ? (
+            <p className="mt-8">
+              They offer <strong>{inr(result.offeredAmount)}</strong>. Add your numbers above to see if that&apos;s fair.
+            </p>
+          ) : null}
 
           {reasons.length > 0 && (
             <>
