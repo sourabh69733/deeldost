@@ -222,7 +222,7 @@ firestore.rules                deny-all client rules
 - ✅ Landing page + waitlist
 - ✅ Rate calculator with copy-as-text rate card
 - ✅ Brand check: rules + domain age + Claude with fallback
-- 🟡 Brand check from a DM screenshot (Claude reads the image)
+- ✅ Brand check from a DM screenshot (Claude reads the image; verify on live Vertex after first deploy)
 - ⬜ Rate limit `/api/check-brand` per IP
 - ⬜ "Is this pay fair?" when the message mentions a price
 - ⬜ Rule: unrealistic pay for the creator's size
