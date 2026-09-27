@@ -12,7 +12,8 @@ export function igAppConfig() {
   const appId = process.env.INSTAGRAM_APP_ID;
   const appSecret = process.env.INSTAGRAM_APP_SECRET;
   const appUrl = process.env.APP_URL;
-  // Secret Manager holds "not-set" until the Meta app exists.
-  if (!appId || !appSecret || appSecret === "not-set" || !appUrl) return null;
-  return { appId, appSecret, redirectUri: `${appUrl.replace(/\/$/, "")}/api/instagram/callback` };
+  // Placeholders ("not-set", "REPLACE_WITH_...") mean the Meta app isn't set up yet.
+  const missing = (v?: string) => !v || v === "not-set" || v.startsWith("REPLACE_WITH");
+  if (missing(appId) || missing(appSecret) || missing(appUrl)) return null;
+  return { appId: appId!, appSecret: appSecret!, redirectUri: `${appUrl!.replace(/\/$/, "")}/api/instagram/callback` };
 }

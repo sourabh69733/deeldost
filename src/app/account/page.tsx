@@ -1,9 +1,12 @@
 import { getCurrentUser } from "@/lib/server/session";
+import { igAppConfig } from "@/lib/instagram/config";
+import { getStats, getSummary } from "@/lib/instagram/store";
 import { SignInButton, SignOutButton } from "@/components/AuthButtons";
+import InstagramCard from "@/components/InstagramCard";
 
 export const metadata = { title: "Account — DealDost" };
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: { ig?: string } }) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -19,15 +22,14 @@ export default async function AccountPage() {
     );
   }
 
+  const [summary, stats] = await Promise.all([getSummary(user.uid), getStats(user.uid)]);
+
   return (
     <section className="pt-6">
       <h1 className="text-4xl font-extrabold">Hi{user.name ? `, ${user.name.split(" ")[0]}` : ""}</h1>
       <p className="mt-2" style={{ color: "var(--muted)" }}>{user.email}</p>
 
-      <div className="mt-10 rounded-xl border-2 border-dashed p-6" style={{ borderColor: "var(--line)" }}>
-        <h2 className="text-xl font-bold">Instagram</h2>
-        <p className="hint mt-1">Coming soon: connect your account to price with your real reach and audience.</p>
-      </div>
+      <InstagramCard configured={!!igAppConfig()} summary={summary} stats={stats} notice={searchParams.ig} />
 
       <div className="mt-10"><SignOutButton /></div>
     </section>

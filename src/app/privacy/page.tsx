@@ -41,6 +41,19 @@ export default function PrivacyPage() {
         and when you last signed in. A secure login cookie keeps you signed in for up to 14 days.
       </p>
 
+      <h2>Instagram (if you connect it)</h2>
+      <p>Connecting Instagram is optional and needs a Creator or Business account. With your permission we read:</p>
+      <ul>
+        <li>your profile: username, name, photo, follower and post counts</li>
+        <li>likes, comments, views and reach of your recent reels</li>
+        <li>your followers&apos; city, country, age and gender as totals (Instagram never shares who they are)</li>
+      </ul>
+      <p>
+        We store a summary of these numbers and an encrypted access key so we can refresh them. We never post, comment or
+        send messages for you. Disconnect any time from your account page: we delete the key and your Instagram numbers straight away.
+        You can also remove DealDost in Instagram under Settings, then Apps and websites.
+      </p>
+
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>
 

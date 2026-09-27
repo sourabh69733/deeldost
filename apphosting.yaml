@@ -24,3 +24,12 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "1:66496865626:web:e00c2f1879836a10717f63"
     availability: [BUILD, RUNTIME]
+  # Instagram (Phase 2). Set APP_URL and INSTAGRAM_APP_ID once the backend URL and Meta app exist.
+  - variable: APP_URL
+    value: REPLACE_WITH_APP_HOSTING_URL
+  - variable: INSTAGRAM_APP_ID
+    value: REPLACE_WITH_INSTAGRAM_APP_ID
+  - variable: INSTAGRAM_APP_SECRET
+    secret: dealdost-instagram-app-secret
+  - variable: TOKEN_ENCRYPTION_KEY
+    secret: dealdost-token-encryption-key

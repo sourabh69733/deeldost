@@ -9,9 +9,9 @@ import { COLLECTIONS, getDb } from "./gcp";
 const HOUR_MS = 60 * 60 * 1000;
 
 /** Doc id for this visitor + action + hour window. Exported for tests. */
-export function windowKey(action: string, ip: string, now: number): string {
-  const ipHash = createHash("sha256").update(ip).digest("hex").slice(0, 16);
-  return `${action}_${ipHash}_${Math.floor(now / HOUR_MS)}`;
+export function windowKey(action: string, key: string, now: number): string {
+  const keyHash = createHash("sha256").update(key).digest("hex").slice(0, 16);
+  return `${action}_${keyHash}_${Math.floor(now / HOUR_MS)}`;
 }
 
 /**
@@ -24,12 +24,18 @@ export function clientIp(req: Request, trustedHops = Number(process.env.TRUSTED_
   return hops[hops.length - 1 - trustedHops] ?? "unknown";
 }
 
-export async function allowRequest(action: string, req: Request, limitPerHour: number): Promise<boolean> {
+/** Limit per visitor IP. */
+export function allowRequest(action: string, req: Request, limitPerHour: number): Promise<boolean> {
+  return allowKey(action, clientIp(req), limitPerHour);
+}
+
+/** Limit per any key, e.g. a signed-in user's uid. The key is hashed before storing. */
+export async function allowKey(action: string, key: string, limitPerHour: number): Promise<boolean> {
   const db = getDb();
   if (!db) return true;
 
   const now = Date.now();
-  const ref = db.collection(COLLECTIONS.rateLimits).doc(windowKey(action, clientIp(req), now));
+  const ref = db.collection(COLLECTIONS.rateLimits).doc(windowKey(action, key, now));
   try {
     return await db.runTransaction(async (tx) => {
       const count = ((await tx.get(ref)).get("count") as number | undefined) ?? 0;

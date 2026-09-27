@@ -51,4 +51,6 @@ export const COLLECTIONS = {
   dealReports: "dealReports",
   metrics: "metrics",
   users: "users",
+  igAccounts: "igAccounts",
+  oauthStates: "oauthStates",
 } as const;
