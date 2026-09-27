@@ -154,7 +154,9 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 |---|---|---|
 | `waitlist/{email}` | email, createdAt | 1 ✅ |
 | `brandChecks/{id}` | brandName, website, instagram, risk, flagIds, usedAi, createdAt | 1 ✅ |
-| `dealReports/{id}` | niche, followers, avgViews, deliverable, quoted, actualPaid | 1 |
+| `dealReports/{id}` | platform, deliverable, niche, followers, avgViews, addOns, paid, fairAtTime, ratio | 1 ✅ |
+| `metrics/{YYYY-MM-DD}` | one counter per event (views, checks, shares, reports), India time | 1 ✅ |
+| `rateLimits/{id}` | count, expireAt (TTL) | 1 ✅ |
 | `users/{uid}` | name, niche, igUserId, plan, createdAt | 2 |
 | `users/{uid}/deals/{id}` | brandId, source (dm/comment/paste), status, offer, deliverables, fairPrice, risk, dueDate, paidAt | 3 |
 | `users/{uid}/insightsDaily/{date}` | reach, views, category counts, top questions, bot share | 3 |
@@ -181,12 +183,17 @@ src/
   components/                  UI only
   lib/
     format.ts                  ₹ formatting
-    server/gcp.ts              Firestore + Vertex clients (server only)
-    pricing/                   config.ts (numbers), calculate.ts (math), tests
-    brand-check/               red-flags, domain-check, ai-review, index (pipeline), types, tests
+    site.ts                    site name, contact email, legal date
+    creator-profile.ts         creator's numbers remembered on the device
+    server/                    gcp.ts (clients), rate-limit.ts, metrics.ts (server only)
+    analytics/                 event names, browser track()
+    pricing/                   config (numbers), calculate (math), rate-card, deal-report, tests
+    brand-check/               red-flags, domain-check, pay-check, ai-review, read-screenshot, index (pipeline), tests
     instagram/                 (Phase 2) OAuth, API client, webhook handling
     inbox/                     (Phase 3) filters, categoriser, deal extractor
     insights/                  (Phase 3) daily aggregation
+scripts/metrics.mjs            `npm run metrics`: daily usage table
+src/assets/fonts/              fonts for the rate card image (OFL)
 apphosting.yaml                runtime + env
 firestore.rules                deny-all client rules
 ```
@@ -231,9 +238,9 @@ firestore.rules                deny-all client rules
 - ⬜ After first deploy: log `x-forwarded-for` once and set `TRUSTED_PROXY_HOPS` so the limit can't be bypassed
 - ✅ "Is this pay fair?" when the message mentions a price (numbers shared with rate calculator on the device)
 - ✅ Rule: unrealistic pay for the creator's size (over 3x the high rate)
-- ⬜ Shareable rate card image (`next/og`)
-- ⬜ "What were you actually paid?" feedback → `dealReports`
-- ⬜ Analytics (GA4)
+- ✅ Shareable rate card image (`/api/rate-card`, share sheet or download)
+- ✅ "What were you actually paid?" feedback → `dealReports`
+- ✅ Cookie-free usage counters (`npm run metrics`), see D10
 - ✅ Privacy + terms pages (`/privacy`, `/terms`), footer links
 - ⬜ Set contact email in `src/lib/site.ts` and have a lawyer review privacy + terms before launch
 - ⬜ Launch to 20 to 50 creators, tune pricing
@@ -278,6 +285,7 @@ firestore.rules                deny-all client rules
 | D5 | Never store raw messages | Privacy, DPDP Act | 2026-09-27 |
 | D6 | Instagram first, Gmail later | Creators get most offers in Instagram DMs; Gmail read access is a restricted scope with a yearly paid audit | 2026-09-27 |
 | D7 | Official Meta API only, no scraping | Scraping breaks Meta terms and risks creator accounts | 2026-09-27 |
+| D10 | Cookie-free first-party counters instead of GA4 for now | No consent banner, matches our privacy promise, enough for Phase 1 targets. Can't count unique visitors; revisit GA4 when we need funnels | 2026-09-27 |
 | D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
 

@@ -15,6 +15,8 @@ Node 22 (`nvm use`). No API keys; auth is Google Application Default Credentials
 - Domain check (RDAP): src/lib/brand-check/domain-check.ts
 - Claude review: src/lib/brand-check/ai-review.ts
 - Brand check pipeline: src/lib/brand-check/index.ts
+- Usage events: src/lib/analytics/events.ts (add new event names here)
+- Rate card image: src/app/api/rate-card/route.tsx
 
 ## Rules
 - Rules first, AI second: every feature works if AI fails
