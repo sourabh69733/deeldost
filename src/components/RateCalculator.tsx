@@ -4,6 +4,7 @@ import { ADD_ONS, AddOn, DELIVERABLES, Deliverable, NICHES, Niche, Platform } fr
 import { calculateRate } from "@/lib/pricing/calculate";
 import { inr } from "@/lib/format";
 import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
+import { rateCardQuery } from "@/lib/pricing/rate-card";
 
 const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
 
@@ -15,6 +16,8 @@ export default function RateCalculator() {
   const [niche, setNiche] = useState<Niche>("fashion");
   const [addOns, setAddOns] = useState<AddOn[]>([]);
   const [copied, setCopied] = useState(false);
+  const [handle, setHandle] = useState("");
+  const [sharing, setSharing] = useState(false);
 
   const deliverables = (Object.keys(DELIVERABLES) as Deliverable[]).filter((d) => DELIVERABLES[d].platform === platform);
   const f = toNum(followers), v = toNum(avgViews);
@@ -42,6 +45,31 @@ export default function RateCalculator() {
     setDeliverable(p === "instagram" ? "reel" : "yt_integration");
   }
   const toggleAddOn = (a: AddOn) => setAddOns((cur) => (cur.includes(a) ? cur.filter((x) => x !== a) : [...cur, a]));
+
+  // Share the rate card image through the phone's share sheet, or download it on desktop.
+  async function shareImage() {
+    const clean = handle.replace(/^@/, "").trim();
+    const url = `/api/rate-card?${rateCardQuery({
+      platform, followers: f, avgViews: v, niche,
+      handle: /^[A-Za-z0-9._]{1,30}$/.test(clean) ? clean : undefined,
+    })}`;
+    setSharing(true);
+    try {
+      const blob = await (await fetch(url)).blob();
+      const file = new File([blob], "rate-card.png", { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "My rate card" });
+      } else {
+        const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: "rate-card.png" });
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+    } catch {
+      /* share sheet closed or download blocked: nothing to do */
+    } finally {
+      setSharing(false);
+    }
+  }
 
   async function copyCard() {
     if (!result) return;
@@ -129,7 +157,14 @@ export default function RateCalculator() {
             <p className="mt-5">{result.engagementNote}.</p>
             <p className="hint mt-2">{result.explanation}</p>
             {addOns.length === 0 && <p className="mt-3">If the brand wants to run your content as an ad, charge extra for usage rights.</p>}
-            <button className="btn mt-6" onClick={copyCard}>{copied ? "Copied" : "Copy rate card"}</button>
+            <div className="mt-6">
+              <label htmlFor="handle" className="label">Your handle <span className="hint">(optional, shown on the image)</span></label>
+              <input id="handle" className="field" placeholder="@yourname" value={handle} onChange={(e) => setHandle(e.target.value)} />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button className="btn" onClick={shareImage} disabled={sharing}>{sharing ? "Making image…" : "Share rate card image"}</button>
+              <button className="btn btn-ghost" onClick={copyCard}>{copied ? "Copied" : "Copy as text"}</button>
+            </div>
             <p className="hint mt-6">Estimates only. Your real rate depends on your audience, content quality and the brand.</p>
           </div>
         ) : (
