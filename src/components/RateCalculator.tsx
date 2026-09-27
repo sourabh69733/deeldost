@@ -7,10 +7,11 @@ import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
 import { rateCardQuery } from "@/lib/pricing/rate-card";
 import DealReportForm from "./DealReportForm";
 import { track } from "@/lib/analytics/track";
+import type { InstagramNumbers } from "@/lib/instagram/numbers";
 
 const toNum = (s: string) => Number(s.replace(/[^\d]/g, "")) || 0;
 
-export default function RateCalculator() {
+export default function RateCalculator({ instagram }: { instagram?: InstagramNumbers | null }) {
   const [platform, setPlatform] = useState<Platform>("instagram");
   const [deliverable, setDeliverable] = useState<Deliverable>("reel");
   const [followers, setFollowers] = useState("");
@@ -18,21 +19,23 @@ export default function RateCalculator() {
   const [niche, setNiche] = useState<Niche>("fashion");
   const [addOns, setAddOns] = useState<AddOn[]>([]);
   const [copied, setCopied] = useState(false);
-  const [handle, setHandle] = useState("");
+  const [handle, setHandle] = useState(instagram?.username ?? "");
   const [sharing, setSharing] = useState(false);
 
   const deliverables = (Object.keys(DELIVERABLES) as Deliverable[]).filter((d) => DELIVERABLES[d].platform === platform);
   const f = toNum(followers), v = toNum(avgViews);
   const ready = f > 0 && v > 0;
 
-  // Prefill from this device, and remember changes for the brand checker.
+  // Prefill: real Instagram numbers first, else what this device remembers. Niche always comes from the device.
   useEffect(() => {
     const saved = loadCreatorProfile();
-    if (!saved) return;
-    setFollowers(String(saved.followers));
-    setAvgViews(String(saved.avgViews));
-    setNiche(saved.niche);
-  }, []);
+    if (saved) setNiche(saved.niche);
+    const source = instagram ?? saved;
+    if (!source) return;
+    setFollowers(String(source.followers));
+    setAvgViews(String(source.avgViews));
+  }, [instagram]);
+  const usingInstagram = !!instagram && f === instagram.followers && v === instagram.avgViews;
   useEffect(() => {
     if (ready) saveCreatorProfile({ followers: f, avgViews: v, niche });
   }, [ready, f, v, niche]);
@@ -135,7 +138,13 @@ export default function RateCalculator() {
               value={avgViews} onChange={(e) => setAvgViews(e.target.value)} />
           </div>
         </div>
-        <p className="hint -mt-3">Use the average of your last 10 {platform === "instagram" ? "reels" : "videos"}.</p>
+        {usingInstagram && platform === "instagram" ? (
+          <p className="hint -mt-3" style={{ color: "var(--leaf)" }}>
+            From your Instagram @{instagram!.username}, updated {new Date(instagram!.refreshedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}.
+          </p>
+        ) : (
+          <p className="hint -mt-3">Use the average of your last 10 {platform === "instagram" ? "reels" : "videos"}.</p>
+        )}
 
         <div>
           <label htmlFor="niche" className="label">Niche</label>

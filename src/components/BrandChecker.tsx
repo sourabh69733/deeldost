@@ -6,6 +6,7 @@ import { inr } from "@/lib/format";
 import { loadCreatorProfile, saveCreatorProfile } from "@/lib/creator-profile";
 import { DELIVERABLES, NICHES, type Niche } from "@/lib/pricing/config";
 import type { PayCheck } from "@/lib/brand-check/pay-check";
+import type { InstagramNumbers } from "@/lib/instagram/numbers";
 
 type Shot = { name: string; mediaType: "image/jpeg"; data: string };
 
@@ -24,7 +25,7 @@ const VERDICT = {
   high: { title: "Likely scam", body: "Strong scam signals. Don't pay anything or share personal details.", color: "var(--chili)", dot: "🔴" },
 };
 
-export default function BrandChecker() {
+export default function BrandChecker({ instagram }: { instagram?: InstagramNumbers | null }) {
   const [form, setForm] = useState({ brandName: "", website: "", instagram: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,10 +33,12 @@ export default function BrandChecker() {
   const [shot, setShot] = useState<Shot | null>(null);
   const [stats, setStats] = useState({ followers: "", avgViews: "", niche: "fashion" as Niche });
 
+  // Prefill: real Instagram numbers first, else what this device remembers.
   useEffect(() => {
     const saved = loadCreatorProfile();
-    if (saved) setStats({ followers: String(saved.followers), avgViews: String(saved.avgViews), niche: saved.niche });
-  }, []);
+    const source = instagram ?? saved;
+    if (source) setStats({ followers: String(source.followers), avgViews: String(source.avgViews), niche: saved?.niche ?? "fashion" });
+  }, [instagram]);
 
   const creator = toNum(stats.followers) > 0 && toNum(stats.avgViews) > 0
     ? { followers: toNum(stats.followers), avgViews: toNum(stats.avgViews), niche: stats.niche }
