@@ -56,7 +56,7 @@ export async function getAiReview(input: AiReviewInput): Promise<AiReview | null
     );
     return res.parsed_output ?? null;
   } catch (e) {
-    console.error("[ai-review] failed", e);
+    console.error("[ai-review] failed:", e instanceof Error ? e.message : e);
     return null;
   }
 }

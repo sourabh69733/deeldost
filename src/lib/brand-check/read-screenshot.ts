@@ -43,7 +43,7 @@ export async function readScreenshot(shot: Screenshot): Promise<ScreenshotText |
     );
     return res.parsed_output ?? null;
   } catch (e) {
-    console.error("[read-screenshot] failed", e);
+    console.error("[read-screenshot] failed:", e instanceof Error ? e.message : e);
     return null;
   }
 }
