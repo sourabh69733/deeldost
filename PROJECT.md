@@ -1,7 +1,7 @@
 # DealDost: Project Plan and Progress
 
 The one file for direction and progress. Owner actions are in **Owner to-do** below; build progress is in **section 7**.
-Last updated: 2026-09-27
+Last updated: 2026-09-28
 
 ---
 
@@ -10,8 +10,7 @@ Last updated: 2026-09-27
 Things only the owner can do (accounts, payments, legal). Tick them here; Claude picks up the "then" step.
 
 ### Now (unblocks testing and launch)
-- [ ] **Turn on Google sign-in**: Firebase console → Authentication → Get started → Sign-in method → Google → Enable, pick a support email.
-  *Then:* Claude tests real sign-in end to end.
+- [x] **Turn on Google sign-in** on project ID `omiryn` (not `omiryn-822fe`, which has the same display name). Verified end to end 2026-09-28.
 - [ ] **Raise Claude quota**: Google Cloud console → IAM & Admin → Quotas → `global_online_prediction_requests_per_base_model`, model `anthropic-claude-sonnet` → request 30+/min.
   *Then:* Claude tests AI brand check and screenshot reading live.
 - [ ] **Create App Hosting backend**: Firebase console → App Hosting → Create backend → GitHub `sourabh69733/deeldost`, branch `main`, region nearest India. Share the backend URL.
@@ -292,7 +291,7 @@ firestore.rules                deny-all client rules
 
 ### Phase 2: Connect Instagram
 - ✅ Google sign-in (Firebase Auth → 14-day httpOnly `__session` cookie, CSRF origin check, account page)
-- ⬜ Owner: Firebase console → Authentication → enable Google provider (needed before sign-in works)
+- ✅ Google provider enabled on `omiryn`; real sign-in verified (Auth user + `users/{uid}` doc)
 - ✅ Instagram Login: connect / callback / refresh / disconnect, one-time server-side state
 - ✅ Tokens AES-GCM encrypted in Firestore, key in Secret Manager (`dealdost-token-encryption-key`), see D11
 - ✅ Stats sync: profile, median views of last 12 reels, engagement, follower demographics
