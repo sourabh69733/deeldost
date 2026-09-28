@@ -28,7 +28,7 @@ env:
   - variable: APP_URL
     value: REPLACE_WITH_APP_HOSTING_URL
   - variable: INSTAGRAM_APP_ID
-    value: REPLACE_WITH_INSTAGRAM_APP_ID
+    value: "1812176679910705"
   - variable: INSTAGRAM_APP_SECRET
     secret: dealdost-instagram-app-secret
   - variable: TOKEN_ENCRYPTION_KEY
