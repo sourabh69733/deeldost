@@ -18,7 +18,7 @@ Things only the owner can do (accounts, payments, legal). Tick them here; Claude
 
 ### Instagram (Phase 2)
 - [x] **Create a Meta app** (Instagram app ID `1812176679910705`, set in `apphosting.yaml`).
-- [ ] **Add yourself as Instagram tester** in the app, then accept the invite in Instagram (Settings → Apps and websites → Tester invites). Your account must be Creator or Business.
+- [x] **Add yourself as Instagram tester** in the app, then accept the invite in Instagram (Settings → Apps and websites → Tester invites). Your account must be Creator or Business.
 - [x] **Share the Instagram app ID** with Claude, and store the app secret yourself:
   `printf 'SECRET' | gcloud secrets versions add dealdost-instagram-app-secret --project omiryn --data-file=-`
 - [ ] **Add redirect URI** in the Meta app: `<APP_URL>/api/instagram/callback` (after the backend exists).
