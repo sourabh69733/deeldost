@@ -11,8 +11,6 @@ Things only the owner can do (accounts, payments, legal). Tick them here; Claude
 
 ### Now (unblocks testing and launch)
 - [x] **Turn on Google sign-in** on project ID `omiryn` (not `omiryn-822fe`, which has the same display name). Verified end to end 2026-09-28.
-- [ ] **Raise Claude quota**: Google Cloud console → IAM & Admin → Quotas → `global_online_prediction_requests_per_base_model`, model `anthropic-claude-sonnet` → request 30+/min.
-  *Then:* Claude tests AI brand check and screenshot reading live.
 - [ ] **Create App Hosting backend**: Firebase console → App Hosting → Create backend → GitHub `sourabh69733/deeldost`, branch `main`, region nearest India. Share the backend URL.
   *Then:* Claude sets `APP_URL`, grants the service account Vertex AI User, Cloud Datastore User and access to `dealdost-*` secrets, checks the first deploy and sets `TRUSTED_PROXY_HOPS`.
 - [ ] **Set a budget alert** on project `omiryn` (Billing → Budgets & alerts), e.g. ₹2,000/month with 50/90/100% emails.
@@ -269,7 +267,6 @@ firestore.rules                deny-all client rules
 - ✅ Push to GitHub (`sourabh69733/deeldost`)
 - ✅ GCP project `omiryn`: billing, Vertex AI, Firebase added
 - ✅ Firestore (Native, `asia-south1`) + deny-all rules deployed; local writes verified
-- ⬜ Raise Vertex quota for Claude Sonnet (currently 0; owner action in console)
 - ⬜ App Hosting backend + GitHub link (owner action in Firebase console)
 - ⬜ Grant App Hosting service account **Vertex AI User** + **Cloud Datastore User**, then first deploy
 
