@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <strong>DealDost</strong>
+    <button id="toggle-settings" class="link" type="button">Settings</button>
+  </header>
+
+  <section id="settings" hidden>
+    <p class="hint">Get these from your dashboard: Browser extension, Make extension key.</p>
+    <label for="server">Server</label>
+    <input id="server" placeholder="http://localhost:3000" />
+    <label for="token">Key</label>
+    <input id="token" placeholder="dd_..." type="password" />
+    <button id="save-settings" type="button">Save settings</button>
+  </section>
+
+  <section id="main">
+    <div id="preview" class="card">
+      <p class="muted">Reading this page…</p>
+    </div>
+    <label for="notes">Notes (optional)</label>
+    <textarea id="notes" rows="3" maxlength="2000" placeholder="Why save them? What to pitch?"></textarea>
+    <button id="save" type="button" disabled>Save to dashboard</button>
+  </section>
+
+  <p id="msg" role="status"></p>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "DealDost Saver",
+  "version": "0.1.0",
+  "description": "Save creator profiles from Instagram, YouTube, X, LinkedIn or any website to your DealDost dashboard.",
+  "action": { "default_popup": "popup.html", "default_title": "Save to DealDost" },
+  "background": { "service_worker": "background.js", "type": "module" },
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "host_permissions": ["http://localhost/*", "https://*.hosted.app/*"],
+  "optional_host_permissions": ["https://*/*"]
+}

@@ -1,0 +1,19 @@
+:root { --ink: #1b2240; --paper: #f7f8fa; --line: #dde1ea; --muted: #5b6275; --chili: #c8372d; --marigold: #f5a524; }
+* { box-sizing: border-box; }
+body { width: 340px; margin: 0; padding: 14px; font: 14px/1.4 system-ui, sans-serif; color: var(--ink); background: var(--paper); }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+header strong { font-size: 16px; }
+label { display: block; font-weight: 600; margin: 10px 0 4px; }
+input, textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
+input:focus, textarea:focus { outline: none; border-color: var(--ink); }
+button { width: 100%; margin-top: 12px; padding: 10px; border: 0; border-radius: 999px; background: var(--ink); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.link { width: auto; margin: 0; padding: 0; background: none; color: var(--ink); text-decoration: underline; }
+.card { background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; }
+.card .name { font-weight: 700; font-size: 15px; }
+.card .meta { color: var(--muted); margin-top: 2px; word-break: break-all; }
+.muted, .hint { color: var(--muted); }
+.hint { margin: 0 0 6px; font-size: 13px; }
+#msg { min-height: 1em; margin: 10px 0 0; }
+#msg.error { color: var(--chili); }
+#msg a { color: var(--ink); font-weight: 600; }
