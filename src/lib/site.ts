@@ -4,5 +4,5 @@ export const SITE = {
   // Set before public launch. Shown on the privacy and terms pages.
   contactEmail: "" as string,
   // Bump when the privacy or terms content changes.
-  legalUpdated: "21 November 2026",
+  legalUpdated: "23 November 2026",
 };

@@ -1,3 +1,4 @@
+import { isAdminEmail } from "@/lib/server/admin";
 import { getCurrentUser } from "@/lib/server/session";
 import { igAppConfig } from "@/lib/instagram/config";
 import { getStats, getSummary } from "@/lib/instagram/store";
@@ -43,6 +44,10 @@ export default async function AccountPage({ searchParams }: { searchParams: { ig
 
       {summary && (
         <p className="mt-6"><a href="/wrapped" className="font-semibold underline">Make your Instagram Wrapped →</a></p>
+      )}
+
+      {isAdminEmail(user.email) && (
+        <p className="mt-6"><a href="/admin" className="font-semibold underline">Open dashboard →</a></p>
       )}
 
       <div className="mt-10"><SignOutButton /></div>

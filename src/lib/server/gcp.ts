@@ -53,4 +53,5 @@ export const COLLECTIONS = {
   users: "users",
   igAccounts: "igAccounts",
   oauthStates: "oauthStates",
+  captureTokens: "captureTokens",
 } as const;

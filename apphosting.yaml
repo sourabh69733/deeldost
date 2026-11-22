@@ -33,3 +33,6 @@ env:
     secret: dealdost-instagram-app-secret
   - variable: TOKEN_ENCRYPTION_KEY
     secret: dealdost-token-encryption-key
+  # Google accounts allowed to use /admin and the browser extension (comma separated).
+  - variable: ADMIN_EMAILS
+    value: REPLACE_WITH_ADMIN_EMAILS

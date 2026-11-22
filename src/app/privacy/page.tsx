@@ -67,6 +67,14 @@ export default function PrivacyPage() {
         immediately, and disconnecting Instagram deletes it.
       </p>
 
+      <h2>Creators we research</h2>
+      <p>
+        To find creators who may like DealDost, our team saves some creators&apos; public profile details: name, username,
+        bio, public follower and post counts, public links and links to recent posts, plus our own notes. We save only what
+        anyone can see on the profile, one profile at a time, and only our team can see it. If we contact you, we write the
+        message ourselves. If you want your details removed, email us and we will delete them.
+      </p>
+
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>
 
