@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { InstagramApiError, authorizeUrl, exchangeCode, getFollowerDemographics, getMediaInsights } from "./api";
+import { InstagramApiError, authorizeUrl, exchangeCode, getFollowerDemographics, getMediaInsights, getMediaSince, parseIgTime } from "./api";
 
 // Responses below follow the shapes in Meta's Instagram Login docs.
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
@@ -74,5 +74,33 @@ describe("insights parsing", () => {
       }],
     })));
     expect(await getFollowerDemographics("t", "city")).toEqual([["Mumbai, Maharashtra", 1200], ["Pune, Maharashtra", 300]]);
+  });
+});
+
+describe("getMediaSince", () => {
+  const item = (id: string, timestamp: string) => ({ id, media_product_type: "REELS", timestamp });
+
+  it("pages until posts are older than the cutoff", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(json({ data: [item("a", "2026-05-01T10:00:00+0000")], paging: { cursors: { after: "c1" }, next: "https://next" } }))
+      .mockResolvedValueOnce(json({ data: [item("b", "2026-02-01T10:00:00+0000"), item("old", "2025-12-30T10:00:00+0000")], paging: { cursors: { after: "c2" }, next: "https://next" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    const out = await getMediaSince("t", Date.UTC(2026, 0, 1), 400);
+    expect(out.map((m) => m.id)).toEqual(["a", "b"]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(new URL(fetchMock.mock.calls[1][0]).searchParams.get("after")).toBe("c1");
+  });
+
+  it("stops at the cap and when there is no next page", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => json({ data: [item("a", "2026-05-01T10:00:00+0000"), item("b", "2026-05-01T09:00:00+0000")] })));
+    expect((await getMediaSince("t", 0, 1)).map((m) => m.id)).toEqual(["a"]);
+    expect((await getMediaSince("t", 0, 10)).map((m) => m.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("parseIgTime", () => {
+  it("reads Instagram's +0000 offsets", () => {
+    expect(parseIgTime("2026-03-01T10:00:00+0000")).toBe(Date.UTC(2026, 2, 1, 10));
+    expect(parseIgTime(undefined)).toBeNaN();
   });
 });

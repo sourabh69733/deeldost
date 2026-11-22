@@ -93,13 +93,36 @@ const Media = z.object({
     timestamp: z.string().optional(),
     like_count: z.number().optional(),
     comments_count: z.number().optional(),
+    permalink: z.string().optional(),
   })),
+  paging: z.object({ cursors: z.object({ after: z.string().optional() }).optional(), next: z.string().optional() }).optional(),
 });
 export type MediaItem = z.infer<typeof Media>["data"][number];
 
 export async function getRecentMedia(token: string, limit = 50): Promise<MediaItem[]> {
   const fields = "id,media_product_type,timestamp,like_count,comments_count";
   return (await call(`${IG_GRAPH}/me/media?${new URLSearchParams({ fields, limit: String(limit), access_token: token })}`, Media)).data;
+}
+
+/** Instagram sends "2026-03-01T10:00:00+0000"; make the offset ISO so every runtime parses it. */
+export const parseIgTime = (t?: string) => (t ? Date.parse(t.replace(/([+-]\d{2})(\d{2})$/, "$1:$2")) : NaN);
+
+/** Posts newest first, back to sinceMs, at most maxItems. Pages through the media list. */
+export async function getMediaSince(token: string, sinceMs: number, maxItems: number): Promise<MediaItem[]> {
+  const fields = "id,media_product_type,timestamp,like_count,comments_count,permalink";
+  const out: MediaItem[] = [];
+  let after: string | undefined;
+  do {
+    const q = new URLSearchParams({ fields, limit: "50", access_token: token });
+    if (after) q.set("after", after);
+    const page = await call(`${IG_GRAPH}/me/media?${q}`, Media);
+    for (const m of page.data) {
+      if (parseIgTime(m.timestamp) < sinceMs || out.length >= maxItems) return out;
+      out.push(m);
+    }
+    after = page.paging?.next && page.data.length ? page.paging.cursors?.after : undefined;
+  } while (after);
+  return out;
 }
 
 const MediaInsights = z.object({
