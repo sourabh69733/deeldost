@@ -35,6 +35,15 @@ describe("extractProfile", () => {
     ]);
   });
 
+  it("reads the current Instagram layout without story highlight names", () => {
+    const p = extractProfile({
+      url: "https://www.instagram.com/some.creator_/",
+      title: "Some Creator (@some.creator_) • Instagram photos and videos",
+      text: "some.creator_\nSome Creator\n95 posts\n124 followers\n0 following\nTravel . lifestyle\n.\nunfeigned\nFollowing\nMessage\nUdaipur\nGujarat\nFst✨\nPunjab",
+    });
+    expect(p).toMatchObject({ name: "Some Creator", followers: 124, following: 0, posts: 95, bio: "Travel . lifestyle\n.\nunfeigned" });
+  });
+
   it("ignores an Instagram meta description left over from another profile", () => {
     const p = extractProfile({
       url: "https://www.instagram.com/new.person/",

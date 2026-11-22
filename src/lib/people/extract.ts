@@ -64,12 +64,20 @@ function nameFromTitle(ref: ProfileRef, title: string | undefined): string | nul
   return t.slice(0, 120);
 }
 
-/** Bio lines from Instagram's header text: what comes after the counts, minus buttons and the name. */
+// Instagram profile buttons. In the current layout they sit between the bio and the story highlights.
+const IG_BUTTON = /^(follow|following|follow back|requested|message|edit profile|view archive|share profile|subscribe)$/i;
+
+/**
+ * Bio lines from Instagram's header text: what comes after the counts, up to the first button (so story
+ * highlight names are left out), minus labels and the name.
+ */
 function instagramBio(text: string | undefined, handle: string | null, name: string | null): string | null {
   if (!text) return null;
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   const countsAt = lines.findLastIndex((l) => /\bfollowing\b/i.test(l) && /\d/.test(l));
-  const rest = (countsAt >= 0 ? lines.slice(countsAt + 1) : lines)
+  const after = countsAt >= 0 ? lines.slice(countsAt + 1) : lines;
+  const buttonAt = after.findIndex((l) => IG_BUTTON.test(l));
+  const rest = (buttonAt >= 0 ? after.slice(0, buttonAt) : after)
     .filter((l) => !IG_NOISE.test(l) && l.toLowerCase() !== handle && l !== name);
   return clean(rest.join("\n"), LIMITS.bio);
 }
