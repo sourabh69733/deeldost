@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PersonEditor from "@/components/admin/PersonEditor";
+import PersonalPagePanel from "@/components/admin/PersonalPagePanel";
 import ResearchButton from "@/components/admin/ResearchButton";
 import ResearchNote from "@/components/admin/ResearchNote";
 import { compact, shortDate } from "@/lib/format";
 import { PLATFORMS } from "@/lib/people/config";
 import { displayHandle } from "@/lib/people/list";
 import { getPerson } from "@/lib/people/store";
+import { draftMessages } from "@/lib/outreach/message";
+import { pagePath } from "@/lib/outreach/slug";
 import { getAdminUser } from "@/lib/server/admin";
+import { requestOrigin } from "@/lib/server/origin";
 
 export default async function PersonPage({ params }: { params: { id: string } }) {
   const admin = await getAdminUser();
@@ -15,6 +19,8 @@ export default async function PersonPage({ params }: { params: { id: string } })
   const p = await getPerson(admin.uid, decodeURIComponent(params.id));
   if (!p) notFound();
 
+  const pageUrl = p.page ? `${requestOrigin()}${pagePath(p.page.slug)}` : null;
+  const drafts = pageUrl ? draftMessages(p, pageUrl, admin.name) : null;
   const stats = [["Followers", p.followers], ["Following", p.following], [p.platform === "youtube" ? "Videos" : "Posts", p.posts]] as const;
 
   return (
@@ -35,6 +41,11 @@ export default async function PersonPage({ params }: { params: { id: string } })
             {p.research
               ? <ResearchNote r={p.research} />
               : <p className="hint">Reads their bio, posts and public links, then writes a short note: niche, themes, audience, a rate guess and a pitch idea.</p>}
+          </section>
+
+          <section className="rounded-xl border-2 p-5" style={{ borderColor: "var(--line)", background: "#fff" }}>
+            <h2 className="mb-3 text-lg font-bold">Personal page</h2>
+            <PersonalPagePanel id={p.id} page={p.page ?? null} optedOut={!!p.optedOut} status={p.status} pageUrl={pageUrl} drafts={drafts} />
           </section>
 
           {p.platform !== "website" && (

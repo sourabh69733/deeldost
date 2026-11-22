@@ -12,6 +12,16 @@ async function firebaseAuth() {
   return { auth: auth.getAuth(app), sdk: auth };
 }
 
+/** Personal page code saved for this tab when a creator opens their page (see PersonalPageActions). */
+export const PAGE_REF_KEY = "dd_page_ref";
+function pageRef(): string | undefined {
+  try {
+    return sessionStorage.getItem(PAGE_REF_KEY) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function signInWithGoogle(): Promise<void> {
   const { auth, sdk } = await firebaseAuth();
   await sdk.setPersistence(auth, sdk.inMemoryPersistence);
@@ -19,7 +29,7 @@ export async function signInWithGoogle(): Promise<void> {
   const res = await fetch("/api/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idToken: await cred.user.getIdToken() }),
+    body: JSON.stringify({ idToken: await cred.user.getIdToken(), ref: pageRef() }),
   });
   await sdk.signOut(auth);
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? "Sign-in failed");

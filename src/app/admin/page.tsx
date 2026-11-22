@@ -64,6 +64,7 @@ export default async function AdminPage({ searchParams }: Props) {
                 <p className="truncate text-sm" style={{ color: "var(--muted)" }}>
                   {PLATFORMS[p.platform]} · {displayHandle(p)}{p.followers != null ? ` · ${compact(p.followers)} followers` : ""}
                   {p.research ? ` · ${NICHES[p.research.niche].label}` : ""}
+                  {p.page ? ` · ${p.page.views} view${p.page.views === 1 ? "" : "s"}` : ""}
                 </p>
               </div>
               <div className="shrink-0 text-right">

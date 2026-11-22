@@ -27,6 +27,19 @@ export type Person = {
   capturedAt: number | null;
   /** Latest research note. Missing on people saved before research existed. */
   research?: Research | null;
+  /** Their personal page, if we made one. */
+  page?: PersonPage | null;
+  /** They removed their page. We don't make a new one. */
+  optedOut?: boolean;
+};
+
+export type PersonPage = {
+  slug: string;
+  createdAt: number;
+  views: number;
+  clicks: number;
+  lastViewAt: number | null;
+  signedUpAt: number | null;
 };
 
 /** Stable doc id: platform + handle, or a hash of the URL when there is no handle. */
@@ -65,5 +78,7 @@ export function mergeProfile(existing: Person | null, profile: ExtractedProfile,
     updatedAt: opts.now,
     capturedAt: captured ? opts.now : existing?.capturedAt ?? null,
     research: existing?.research ?? null,
+    page: existing?.page ?? null,
+    optedOut: existing?.optedOut ?? false,
   };
 }

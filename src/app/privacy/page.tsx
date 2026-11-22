@@ -77,6 +77,13 @@ export default function PrivacyPage() {
         pages themselves. If we contact you, we write the message ourselves. If you want your details removed, email us and
         we will delete them.
       </p>
+      <p>
+        <strong>Personal pages:</strong> we may make a private page for you with a rate estimate and tips, shared only by its
+        link and hidden from search engines. It shows your public name, username, follower and post counts and our estimate,
+        never our notes. We count visits and button clicks on it, as totals only. The page saves its code in your browser for
+        that tab, so if you then sign up we know it helped. The &quot;Remove this page&quot; button deletes the page straight
+        away and we won&apos;t contact you again.
+      </p>
 
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>

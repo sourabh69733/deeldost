@@ -3,11 +3,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { FieldValue } from "firebase-admin/firestore";
+import { markSignedUp } from "@/lib/outreach/store";
 import { COLLECTIONS, getDb } from "@/lib/server/gcp";
 import { isSameOrigin } from "@/lib/server/same-origin";
 import { SESSION_COOKIE, createSessionCookie } from "@/lib/server/session";
 
-const Input = z.object({ idToken: z.string().min(100).max(5000) });
+// ref: personal page code, if they came from their page (see src/lib/outreach). Marks them as signed up.
+const Input = z.object({ idToken: z.string().min(100).max(5000), ref: z.string().regex(/^[A-Za-z0-9_-]{12}$/).optional() });
 
 const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/" };
 
@@ -31,6 +33,10 @@ export async function POST(req: Request) {
       lastLoginAt: FieldValue.serverTimestamp(),
       ...(exists ? {} : { createdAt: FieldValue.serverTimestamp() }),
     }, { merge: true });
+  }
+
+  if (parsed.data.ref) {
+    await markSignedUp(parsed.data.ref).catch((e) => console.warn("[session] ref failed:", e instanceof Error ? e.message : e));
   }
 
   const res = NextResponse.json({ ok: true });

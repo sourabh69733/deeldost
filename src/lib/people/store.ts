@@ -65,6 +65,12 @@ export async function saveResearch(uid: string, id: string, research: Research):
   });
 }
 
+/** Deletes the person and turns off their personal page link. */
 export async function deletePerson(uid: string, id: string): Promise<void> {
-  if (await getPerson(uid, id)) await peopleRef(uid).doc(id).delete();
+  const person = await getPerson(uid, id);
+  if (!person) return;
+  const batch = db().batch();
+  if (person.page) batch.delete(db().collection(COLLECTIONS.personalPages).doc(person.page.slug));
+  batch.delete(peopleRef(uid).doc(id));
+  await batch.commit();
 }
