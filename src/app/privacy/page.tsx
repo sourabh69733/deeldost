@@ -59,6 +59,14 @@ export default function PrivacyPage() {
         off hides it immediately.
       </p>
 
+      <p>
+        <strong>Wrapped:</strong> if you make one, we read this year&apos;s posts (date, type, likes, comments, link) and the
+        views of up to your 60 latest reels, and store only the yearly totals, your top reel&apos;s numbers and link, and your
+        monthly counts. No captions, photos or videos. It is private by default. If you turn on its public link, anyone with
+        it can see those totals, your username and photo. It is hidden from search engines, turning it off hides it
+        immediately, and disconnecting Instagram deletes it.
+      </p>
+
       <h2>Waitlist</h2>
       <p>If you join the waitlist we store your email address, only to tell you when new features open.</p>
 

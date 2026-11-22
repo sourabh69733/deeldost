@@ -4,6 +4,7 @@ const nextConfig = {
     // Files read at runtime with fs must be listed so they ship with the deployed server.
     outputFileTracingIncludes: {
       "/api/rate-card": ["./src/assets/fonts/**"],
+      "/api/wrapped/card": ["./src/assets/fonts/**"],
     },
   },
 };

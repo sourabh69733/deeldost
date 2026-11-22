@@ -4,6 +4,11 @@ import WaitlistForm from "@/components/WaitlistForm";
 export default function Home() {
   return (
     <>
+      <Link href="/wrapped" className="mt-4 flex items-center justify-between gap-3 rounded-2xl px-5 py-4 text-white" style={{ background: "linear-gradient(120deg, #1b2240, #5b2a6e)" }}>
+        <span><strong style={{ color: "var(--marigold)" }}>New:</strong> your year on Instagram, Wrapped. Free.</span>
+        <span className="shrink-0 font-semibold">Try it →</span>
+      </Link>
+
       <section className="pt-10 pb-14">
         <h1 className="text-[2.6rem] font-extrabold leading-[1.05] sm:text-6xl">
           A brand just messaged you. What do you say?

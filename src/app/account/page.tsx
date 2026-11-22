@@ -41,6 +41,10 @@ export default async function AccountPage({ searchParams }: { searchParams: { ig
         </section>
       ) : null}
 
+      {summary && (
+        <p className="mt-6"><a href="/wrapped" className="font-semibold underline">Make your Instagram Wrapped →</a></p>
+      )}
+
       <div className="mt-10"><SignOutButton /></div>
     </section>
   );

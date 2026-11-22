@@ -9,7 +9,7 @@ describe("dayKey", () => {
 });
 
 describe("viewEvent", () => {
-  it.each([["/", "view_home"], ["/rate", "view_rate"], ["/check", "view_check"], ["/privacy", "view_other"]])(
+  it.each([["/", "view_home"], ["/rate", "view_rate"], ["/check", "view_check"], ["/wrapped/riya", "view_wrapped"], ["/privacy", "view_other"]])(
     "%s -> %s", (path, event) => expect(viewEvent(path)).toBe(event),
   );
 });

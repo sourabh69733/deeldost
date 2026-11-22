@@ -9,7 +9,8 @@ export default async function Header() {
       <Link href="/" className="display text-xl font-extrabold">
         Deal<span style={{ color: "var(--marigold-deep)" }}>Dost</span>
       </Link>
-      <nav className="flex items-center gap-5 font-medium">
+      <nav className="flex items-center gap-4 whitespace-nowrap text-[15px] font-medium sm:gap-5 sm:text-base">
+        <Link href="/wrapped" className="hover:underline">Wrapped</Link>
         <Link href="/rate" className="hover:underline">My rate</Link>
         <Link href="/check" className="hover:underline">Check a brand</Link>
         {user

@@ -4,10 +4,12 @@
 export const CLIENT_EVENTS = [
   "view_home", "view_rate", "view_check", "view_other",
   "rate_calculated", "card_shared", "card_copied",
+  "view_wrapped", "wrapped_played", "wrapped_shared", "wrapped_make_own",
 ] as const;
 
 export const SERVER_EVENTS = [
   "waitlist_join", "check_run", "check_screenshot", "check_limited", "deal_report",
+  "wrapped_generated",
 ] as const;
 
 export type ClientEvent = (typeof CLIENT_EVENTS)[number];
@@ -22,5 +24,6 @@ export function viewEvent(pathname: string): ClientEvent {
   if (pathname === "/") return "view_home";
   if (pathname.startsWith("/rate")) return "view_rate";
   if (pathname.startsWith("/check")) return "view_check";
+  if (pathname.startsWith("/wrapped")) return "view_wrapped";
   return "view_other";
 }

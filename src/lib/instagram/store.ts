@@ -2,6 +2,7 @@
 //   users/{uid}.instagram           summary shown in the UI (username, picture, connectedAt, needsReconnect)
 //   users/{uid}/private/instagram   encrypted access token + expiry (server only, never sent to the browser)
 //   users/{uid}/stats/instagram     latest InstagramStats snapshot
+//   users/{uid}/wrapped/{year}      Wrapped snapshots (see src/lib/wrapped/store.ts), deleted on disconnect
 //   igAccounts/{igUserId}           { uid }: one Instagram account links to one DealDost user (webhooks use this later)
 //   oauthStates/{state}             { uid, expireAt }: one-time login state, TTL-deleted
 import "server-only";
@@ -115,13 +116,14 @@ export async function getAccessToken(uid: string): Promise<string | null> {
   return token;
 }
 
-/** Removes the token, stats, summary and account link. */
+/** Removes the token, stats, Wrapped snapshots, summary and account link. */
 export async function disconnect(uid: string): Promise<void> {
-  const summary = await getSummary(uid);
+  const [summary, wrappedDocs] = await Promise.all([getSummary(uid), userRef(uid).collection("wrapped").listDocuments()]);
   const batch = db().batch();
   batch.delete(tokenRef(uid));
   batch.delete(statsRef(uid));
-  batch.update(userRef(uid), { instagram: FieldValue.delete() });
+  wrappedDocs.forEach((d) => batch.delete(d));
+  batch.update(userRef(uid), { instagram: FieldValue.delete(), wrapped: FieldValue.delete() });
   if (summary?.igUserId) batch.delete(db().collection(COLLECTIONS.igAccounts).doc(summary.igUserId));
   await batch.commit();
 }
