@@ -1,27 +1,12 @@
 // GET /api/rate-card?p=instagram&f=50000&v=15000&n=fashion&h=handle
 // Returns a 1080x1350 PNG rate card (Instagram portrait size) to share with brands.
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { compact, inr } from "@/lib/format";
 import { NICHES } from "@/lib/pricing/config";
 import { buildRateCard, parseRateCardQuery } from "@/lib/pricing/rate-card";
+import { ogFonts } from "@/lib/server/og-fonts";
 
 const INK = "#1b2240", PAPER = "#f7f8fa", MARIGOLD = "#f5a524", MUTED = "#5b6275", LINE = "#dde1ea";
-
-// Fonts live in the repo (see next.config.mjs for deploy tracing). Hind's Devanagari file has the ₹ sign.
-const fontDir = join(process.cwd(), "src/assets/fonts");
-const fonts = Promise.all([
-  readFile(join(fontDir, "hind-latin-400-normal.woff")),
-  readFile(join(fontDir, "hind-latin-600-normal.woff")),
-  readFile(join(fontDir, "hind-devanagari-600-normal.woff")),
-  readFile(join(fontDir, "bricolage-grotesque-latin-800-normal.woff")),
-]).then(([regular, semibold, rupee, display]) => [
-  { name: "Hind", data: regular, weight: 400 as const },
-  { name: "Hind", data: semibold, weight: 600 as const },
-  { name: "HindRupee", data: rupee, weight: 600 as const },
-  { name: "Bricolage", data: display, weight: 800 as const },
-]);
 
 export async function GET(req: Request) {
   const params = parseRateCardQuery(new URL(req.url).searchParams);
@@ -73,7 +58,7 @@ export async function GET(req: Request) {
     {
       width: 1080,
       height: 1350,
-      fonts: await fonts,
+      fonts: await ogFonts,
       // Same query always gives the same image.
       headers: { "Cache-Control": "public, max-age=86400, immutable" },
     },
