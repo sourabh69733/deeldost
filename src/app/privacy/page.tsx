@@ -71,8 +71,11 @@ export default function PrivacyPage() {
       <p>
         To find creators who may like DealDost, our team saves some creators&apos; public profile details: name, username,
         bio, public follower and post counts, public links and links to recent posts, plus our own notes. We save only what
-        anyone can see on the profile, one profile at a time, and only our team can see it. If we contact you, we write the
-        message ourselves. If you want your details removed, email us and we will delete them.
+        anyone can see on the profile, one profile at a time, and only our team can see it. We may also visit public links
+        from the profile (such as a website or link page) and use Claude (made by Anthropic) through Google Cloud Vertex AI
+        to write a short note about the kind of content they make. We store that note and any public contact email, not the
+        pages themselves. If we contact you, we write the message ourselves. If you want your details removed, email us and
+        we will delete them.
       </p>
 
       <h2>Waitlist</h2>

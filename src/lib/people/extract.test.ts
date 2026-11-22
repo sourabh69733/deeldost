@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractProfile, profileFromUrl } from "./extract";
+import { cleanCaption, extractProfile, profileFromUrl } from "./extract";
 
 describe("extractProfile", () => {
   it("reads an Instagram profile header", () => {
@@ -14,7 +14,7 @@ describe("extractProfile", () => {
         "not a link",
       ],
       posts: [
-        { url: "https://www.instagram.com/p/AAA/?img_index=1", caption: "Photo by Riya on May 1. May be an image of tea." },
+        { url: "https://www.instagram.com/p/AAA/?img_index=1", caption: "Chai time ☕ May be an image of tea." },
         { url: "https://www.instagram.com/p/AAA/", caption: "dup" },
         { url: "https://www.instagram.com/reel/BBB/" },
       ],
@@ -30,7 +30,7 @@ describe("extractProfile", () => {
       links: ["https://linktr.ee/riya"],
     });
     expect(p?.recentPosts).toEqual([
-      { url: "https://www.instagram.com/p/AAA/", caption: "Photo by Riya on May 1. May be an image of tea." },
+      { url: "https://www.instagram.com/p/AAA/", caption: "Chai time ☕" },
       { url: "https://www.instagram.com/reel/BBB/", caption: null },
     ]);
   });
@@ -76,6 +76,16 @@ describe("extractProfile", () => {
 
   it("returns null for links that are not profiles", () => {
     expect(extractProfile({ url: "https://www.instagram.com/p/ABC/" })).toBeNull();
+  });
+});
+
+describe("cleanCaption", () => {
+  it("drops Instagram's automatic image descriptions", () => {
+    expect(cleanCaption("Photo by Nikita on November 18, 2026. May be an image of lake, mountain and text.")).toBeNull();
+    expect(cleanCaption("Photo shared by Riya on November 14, 2026 tagging @amit. May be an image of dress.")).toBeNull();
+    expect(cleanCaption("Sunrise trek ☀️ #travel May be an image of mountain")).toBe("Sunrise trek ☀️ #travel");
+    expect(cleanCaption("Did you understand..?? #fyp")).toBe("Did you understand..?? #fyp");
+    expect(cleanCaption(null)).toBeNull();
   });
 });
 

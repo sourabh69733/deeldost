@@ -5,6 +5,7 @@ import AddPersonForm from "@/components/admin/AddPersonForm";
 import ExtensionKey from "@/components/admin/ExtensionKey";
 import { compact, shortDate } from "@/lib/format";
 import { PLATFORMS, STATUSES, STATUS_KEYS } from "@/lib/people/config";
+import { NICHES } from "@/lib/pricing/config";
 import { countByStatus, displayHandle, filterPeople, isStatus } from "@/lib/people/list";
 import { listPeople } from "@/lib/people/store";
 import { getAdminUser } from "@/lib/server/admin";
@@ -62,6 +63,7 @@ export default async function AdminPage({ searchParams }: Props) {
                 <p className="truncate font-semibold">{p.name ?? displayHandle(p)}</p>
                 <p className="truncate text-sm" style={{ color: "var(--muted)" }}>
                   {PLATFORMS[p.platform]} · {displayHandle(p)}{p.followers != null ? ` · ${compact(p.followers)} followers` : ""}
+                  {p.research ? ` · ${NICHES[p.research.niche].label}` : ""}
                 </p>
               </div>
               <div className="shrink-0 text-right">

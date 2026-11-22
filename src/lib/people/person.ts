@@ -2,6 +2,7 @@
 import { createHash } from "node:crypto";
 import { LIMITS, type Platform, type Status } from "./config";
 import type { ExtractedProfile, RecentPost } from "./extract";
+import type { Research } from "./research";
 
 export type Source = "extension" | "link";
 
@@ -24,6 +25,8 @@ export type Person = {
   updatedAt: number;
   /** Last time the extension read their page. */
   capturedAt: number | null;
+  /** Latest research note. Missing on people saved before research existed. */
+  research?: Research | null;
 };
 
 /** Stable doc id: platform + handle, or a hash of the URL when there is no handle. */
@@ -61,5 +64,6 @@ export function mergeProfile(existing: Person | null, profile: ExtractedProfile,
     createdAt: existing?.createdAt ?? opts.now,
     updatedAt: opts.now,
     capturedAt: captured ? opts.now : existing?.capturedAt ?? null,
+    research: existing?.research ?? null,
   };
 }

@@ -52,6 +52,18 @@ function httpUrl(href: string): URL | null {
   }
 }
 
+/**
+ * Instagram fills image alt text with "Photo by Name on May 1, 2026. May be an image of makeup and text."
+ * That is Instagram's guess, not the creator's words, so drop it. Returns null if nothing real is left.
+ */
+export function cleanCaption(caption: string | null | undefined): string | null {
+  const t = (caption ?? "")
+    .replace(/^(photo|video|reel)( shared)? by .+? on [A-Z][a-z]+ \d{1,2}, \d{4}( tagging [^.]*)?\.?\s*/i, "")
+    .replace(/\s*May be (an image|a video|a graphic)[^]*$/i, "")
+    .trim();
+  return t || null;
+}
+
 /** Name from page titles like "Name (@handle) • Instagram ...", "Name - YouTube", "Name - Title | LinkedIn". */
 function nameFromTitle(ref: ProfileRef, title: string | undefined): string | null {
   if (!title) return null;
@@ -111,7 +123,7 @@ export function extractProfile(p: CapturePayload): ExtractedProfile | null {
     const url = `${u.origin}${u.pathname}`;
     if (seen.has(url)) continue;
     seen.add(url);
-    recentPosts.push({ url, caption: clean(post.caption, LIMITS.caption) });
+    recentPosts.push({ url, caption: clean(cleanCaption(post.caption), LIMITS.caption) });
     if (recentPosts.length >= LIMITS.posts) break;
   }
 

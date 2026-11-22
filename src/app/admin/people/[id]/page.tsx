@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PersonEditor from "@/components/admin/PersonEditor";
+import ResearchButton from "@/components/admin/ResearchButton";
+import ResearchNote from "@/components/admin/ResearchNote";
 import { compact, shortDate } from "@/lib/format";
 import { PLATFORMS } from "@/lib/people/config";
 import { displayHandle } from "@/lib/people/list";
@@ -25,6 +27,16 @@ export default async function PersonPage({ params }: { params: { id: string } })
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
+          <section className="rounded-xl border-2 p-5" style={{ borderColor: "var(--line)", background: "#fff" }}>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-bold">Research</h2>
+              <ResearchButton id={p.id} again={!!p.research} />
+            </div>
+            {p.research
+              ? <ResearchNote r={p.research} />
+              : <p className="hint">Reads their bio, posts and public links, then writes a short note: niche, themes, audience, a rate guess and a pitch idea.</p>}
+          </section>
+
           {p.platform !== "website" && (
             <dl className="grid grid-cols-3 gap-3">
               {stats.map(([label, n]) => (

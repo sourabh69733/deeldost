@@ -5,6 +5,7 @@ import { COLLECTIONS, getDb } from "@/lib/server/gcp";
 import { LIMITS, type Status } from "./config";
 import type { ExtractedProfile } from "./extract";
 import { addNotes, mergeProfile, personId, type Person, type Source } from "./person";
+import type { Research } from "./research";
 
 function db() {
   const d = getDb();
@@ -49,6 +50,19 @@ export async function updatePerson(uid: string, id: string, patch: PersonPatch):
   };
   await peopleRef(uid).doc(id).set(next);
   return next;
+}
+
+/** Saves a research note. A person still at "Saved" moves to "Researched". */
+export async function saveResearch(uid: string, id: string, research: Research): Promise<Person | null> {
+  const ref = peopleRef(uid).doc(id);
+  return db().runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return null;
+    const person = snap.data() as Person;
+    const next: Person = { ...person, research, status: person.status === "saved" ? "researched" : person.status, updatedAt: Date.now() };
+    tx.set(ref, next);
+    return next;
+  });
 }
 
 export async function deletePerson(uid: string, id: string): Promise<void> {
