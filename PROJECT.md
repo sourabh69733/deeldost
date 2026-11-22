@@ -1,7 +1,7 @@
 # DealDost: Project Plan and Progress
 
 The one file for direction and progress. Owner actions are in **Owner to-do** below; build progress is in **section 7**.
-Last updated: 2026-11-21
+Last updated: 2026-11-23
 
 ---
 
@@ -15,6 +15,7 @@ Things only the owner can do (accounts, payments, legal). Tick them here; Claude
   *Then:* Claude sets `APP_URL`, grants the service account Vertex AI User, Cloud Datastore User and access to `dealdost-*` secrets, checks the first deploy and sets `TRUSTED_PROXY_HOPS`.
 - [ ] **Set a budget alert** on project `omiryn` (Billing → Budgets & alerts), e.g. ₹2,000/month with 50/90/100% emails.
 - [ ] **Contact email** for the privacy and terms pages (ideally on your own domain).
+- [ ] **Admin emails for deploy**: replace `REPLACE_WITH_ADMIN_EMAILS` in `apphosting.yaml` with the Google account(s) that may use `/admin` (locally it's `ADMIN_EMAILS` in `.env.local`).
 
 ### Instagram (Phase 2)
 - [x] **Create a Meta app** (Instagram app ID `1812176679910705`, set in `apphosting.yaml`).
@@ -196,6 +197,8 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | `users/{uid}/private/instagram` | tokenEnc (AES-GCM), expiresAt, refreshedAt, permissions. Server only | 2 ✅ |
 | `users/{uid}/stats/instagram` | followers, avgViews (median), reelsCounted, engagementRate, audience {cities, countries, age, gender: [{label, share}]}, refreshedAt | 2 ✅ |
 | `users/{uid}/wrapped/{year}` | Wrapped: posts, reels, views, likes, comments, topReel {views, likes, comments, month, permalink}, months [{month, posts, views}], bestMonth, busiestDay, streakWeeks, persona. `users/{uid}.wrapped` {public}. Deleted on disconnect | 2 ✅ |
+| `users/{uid}/people/{id}` | Creator research (admin only): platform, handle, url, name, bio, followers, following, posts, links, recentPosts [{url, caption}], notes, status, source, createdAt, updatedAt, capturedAt. Id = `platform_handle` or a URL hash. Raw page text is never stored | Growth ✅ |
+| `captureTokens/{sha256(key)}` | uid, email, createdAt. Extension key, hash only; `users/{uid}.captureTokenHash` points to the current one | Growth ✅ |
 | `igAccounts/{igUserId}` | uid (one Instagram account ↔ one user; webhooks use it) | 2 ✅ |
 | `oauthStates/{state}` | uid, expireAt (TTL) | 2 ✅ |
 | `users/{uid}/deals/{id}` | brandId, source (dm/comment/paste), status, offer, deliverables, fairPrice, risk, dueDate, paidAt | 3 |
@@ -234,10 +237,13 @@ src/
     instagram/                 config, api (typed client), store (Firestore), sync, stats, numbers
     kit/                       media kit settings + public lookup
     wrapped/                   yearly Wrapped: config (copy, personas), compute, story slides, sync, store, demo
+    people/                    creator research: url (link → platform/handle), count, extract (page → profile), person (merge), list, store, tokens (extension keys)
+    server/admin.ts            ADMIN_EMAILS check for /admin and the extension
     inbox/                     (Phase 3) filters, categoriser, deal extractor
     insights/                  (Phase 3) daily aggregation
 scripts/metrics.mjs            `npm run metrics`: daily usage table
 src/assets/fonts/              fonts for the rate card image (OFL)
+extension/                     Chrome extension (plain JS, load unpacked): saves the open profile to /api/capture
 apphosting.yaml                runtime + env
 firestore.rules                deny-all client rules
 ```
@@ -305,6 +311,13 @@ firestore.rules                deny-all client rules
 - ⬜ Register business for Meta verification (see D9)
 - ⬜ App Review: `instagram_business_basic` + `instagram_business_manage_insights` (needs privacy URL, screencast, data deletion instructions)
 
+### Growth: creator research (admin only)
+- ✅ Dashboard `/admin` for `ADMIN_EMAILS`: add by link, people list with status filter and search, person page with status, notes and delete, see D14
+- ✅ Chrome extension `extension/`: one-click save of the open profile (Instagram, YouTube, X, LinkedIn, any site), right-click save link or page, per-admin key made in `/admin`
+- ⬜ Research job: fetch public links (website, Linktree), Claude summary (niche, themes, audience guess), rate estimate from `pricing/`
+- ⬜ Personal page per person (profile snapshot + rate card + tips) and a draft first message (never auto-sent), with view and sign-up tracking
+- ⬜ Automation: bulk re-run, CSV import, auto-delete people with no reply after 90 days
+
 ### Phase 3: Inbox + Insights (paid)
 - ⬜ App Review: comments + messages
 - ⬜ Webhook endpoint → Pub/Sub → worker
@@ -340,6 +353,7 @@ firestore.rules                deny-all client rules
 | D10 | Cookie-free first-party counters instead of GA4 for now | No consent banner, matches our privacy promise, enough for Phase 1 targets. Can't count unique visitors; revisit GA4 when we need funnels | 2026-09-27 |
 | D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
 | D13 | Creator Wrapped as the first growth loop: creators make a yearly recap from their own connected account, share it as a Story, and each public page asks viewers to make their own. No pages about other people, no scraping | Opt-in data only (Meta terms, DPDP); December is recap season and Instagram has none; brings creators into Instagram connect, media kit and rate card | 2026-11-21 |
+| D14 | Creator research tool for finding first users: admin-only dashboard plus a Chrome extension that saves a public profile only when the admin clicks (no background crawling, no auto-messages). Stores public profile fields and our notes, never raw page text. Narrows D7 and D13: they still hold for creator-facing features | Fast way to build a first-user pipeline without Meta APIs. Owner accepts the platform-terms risk to their own account. Indian creators first, so GDPR is out of scope for now | 2026-11-23 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
 
 ---
