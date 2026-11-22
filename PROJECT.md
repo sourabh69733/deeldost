@@ -1,7 +1,7 @@
 # DealDost: Project Plan and Progress
 
 The one file for direction and progress. Owner actions are in **Owner to-do** below; build progress is in **section 7**.
-Last updated: 2026-09-28
+Last updated: 2026-11-21
 
 ---
 
@@ -195,6 +195,7 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | `users/{uid}` | name, email, picture, createdAt, lastLoginAt, `instagram` {igUserId, username, picture, connectedAt, needsReconnect}, `kit` {public, niche} | 2 ✅ |
 | `users/{uid}/private/instagram` | tokenEnc (AES-GCM), expiresAt, refreshedAt, permissions. Server only | 2 ✅ |
 | `users/{uid}/stats/instagram` | followers, avgViews (median), reelsCounted, engagementRate, audience {cities, countries, age, gender: [{label, share}]}, refreshedAt | 2 ✅ |
+| `users/{uid}/wrapped/{year}` | Wrapped: posts, reels, views, likes, comments, topReel {views, likes, comments, month, permalink}, months [{month, posts, views}], bestMonth, busiestDay, streakWeeks, persona. `users/{uid}.wrapped` {public}. Deleted on disconnect | 2 ✅ |
 | `igAccounts/{igUserId}` | uid (one Instagram account ↔ one user; webhooks use it) | 2 ✅ |
 | `oauthStates/{state}` | uid, expireAt (TTL) | 2 ✅ |
 | `users/{uid}/deals/{id}` | brandId, source (dm/comment/paste), status, offer, deliverables, fairPrice, risk, dueDate, paidAt | 3 |
@@ -232,6 +233,7 @@ src/
     server/session.ts          read the signed-in user; server/crypto.ts token encryption
     instagram/                 config, api (typed client), store (Firestore), sync, stats, numbers
     kit/                       media kit settings + public lookup
+    wrapped/                   yearly Wrapped: config (copy, personas), compute, story slides, sync, store, demo
     inbox/                     (Phase 3) filters, categoriser, deal extractor
     insights/                  (Phase 3) daily aggregation
 scripts/metrics.mjs            `npm run metrics`: daily usage table
@@ -294,6 +296,8 @@ firestore.rules                deny-all client rules
 - ✅ Stats sync: profile, median views of last 12 reels, engagement, follower demographics
 - ✅ Rate calculator + brand checker pre-filled from real Instagram numbers
 - ✅ Media kit: `/kit/<username>`, off by default, noindex, rate card as link preview
+- ✅ Creator Wrapped: `/wrapped` (sample story + make yours), story player, 1080x1920 Story image (`/api/wrapped/card`), public link `/wrapped/<username>` off by default with "Make your own" button, see D13
+- ⬜ Wrapped launch: add 10 to 20 micro creators as Meta app testers, make theirs, track `wrapped_shared` and `wrapped_make_own` (`npm run metrics`)
 - ⬜ Owner: create Meta **Business** app, add Instagram product ("API setup with Instagram login"), add yourself as Instagram tester
 - ⬜ Set `INSTAGRAM_APP_ID` + `APP_URL` in `apphosting.yaml`, app secret in `dealdost-instagram-app-secret`, redirect URI `<APP_URL>/api/instagram/callback` in Meta
 - ⬜ First real connect with a tester account; verify metrics names against live API
@@ -335,6 +339,7 @@ firestore.rules                deny-all client rules
 | D12 | "Typical views" = median of the last 12 reels | One viral reel shouldn't inflate a creator's price or media kit | 2026-09-27 |
 | D10 | Cookie-free first-party counters instead of GA4 for now | No consent banner, matches our privacy promise, enough for Phase 1 targets. Can't count unique visitors; revisit GA4 when we need funnels | 2026-09-27 |
 | D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
+| D13 | Creator Wrapped as the first growth loop: creators make a yearly recap from their own connected account, share it as a Story, and each public page asks viewers to make their own. No pages about other people, no scraping | Opt-in data only (Meta terms, DPDP); December is recap season and Instagram has none; brings creators into Instagram connect, media kit and rate card | 2026-11-21 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
 
 ---
