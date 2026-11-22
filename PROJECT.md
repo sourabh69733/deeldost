@@ -198,6 +198,7 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | `users/{uid}/stats/instagram` | followers, avgViews (median), reelsCounted, engagementRate, audience {cities, countries, age, gender: [{label, share}]}, refreshedAt | 2 ✅ |
 | `users/{uid}/wrapped/{year}` | Wrapped: posts, reels, views, likes, comments, topReel {views, likes, comments, month, permalink}, months [{month, posts, views}], bestMonth, busiestDay, streakWeeks, persona. `users/{uid}.wrapped` {public}. Deleted on disconnect | 2 ✅ |
 | `users/{uid}/people/{id}` | Creator research (admin only): platform, handle, url, name, bio, followers, following, posts, links, recentPosts [{url, caption}], notes, status, source, createdAt, updatedAt, capturedAt. Id = `platform_handle` or a URL hash. Raw page text is never stored | Growth ✅ |
+| `users/{uid}/people/{id}.research` | niche, nicheSource (rules/ai), themes, summary, audience, location, languages, brands, pitch, emails (public only), rate {deliverable, assumedViews, low, fair, high}, sources (pages read), usedAi, researchedAt. Fetched page text is never stored | Growth ✅ |
 | `captureTokens/{sha256(key)}` | uid, email, createdAt. Extension key, hash only; `users/{uid}.captureTokenHash` points to the current one | Growth ✅ |
 | `igAccounts/{igUserId}` | uid (one Instagram account ↔ one user; webhooks use it) | 2 ✅ |
 | `oauthStates/{state}` | uid, expireAt (TTL) | 2 ✅ |
@@ -237,7 +238,9 @@ src/
     instagram/                 config, api (typed client), store (Firestore), sync, stats, numbers
     kit/                       media kit settings + public lookup
     wrapped/                   yearly Wrapped: config (copy, personas), compute, story slides, sync, store, demo
-    people/                    creator research: url (link → platform/handle), count, extract (page → profile), person (merge), list, store, tokens (extension keys)
+    people/                    creator research: url (link → platform/handle), count, extract (page → profile), person (merge), list, store, tokens (extension keys),
+                               rules (niche, hashtags, emails, rate guess), html (page reader), ai-research (Claude), research (pipeline)
+    server/safe-fetch.ts       fetch public pages only (blocks internal IPs on every redirect, time and size limits)
     server/admin.ts            ADMIN_EMAILS check for /admin and the extension
     inbox/                     (Phase 3) filters, categoriser, deal extractor
     insights/                  (Phase 3) daily aggregation
@@ -314,7 +317,7 @@ firestore.rules                deny-all client rules
 ### Growth: creator research (admin only)
 - ✅ Dashboard `/admin` for `ADMIN_EMAILS`: add by link, people list with status filter and search, person page with status, notes and delete, see D14
 - ✅ Chrome extension `extension/`: one-click save of the open profile (Instagram, YouTube, X, LinkedIn, any site), right-click save link or page, per-admin key made in `/admin`
-- ⬜ Research job: fetch public links (website, Linktree), Claude summary (niche, themes, audience guess), rate estimate from `pricing/`
+- ✅ Research job: "Run research" on a person reads their bio, captions (Instagram's automatic image descriptions removed) and up to 2 public links (website, Linktree; safe fetch, public IPs only), then rules give niche, content hashtags, public emails and a one-Reel rate guess (1,000+ followers, views assumed at 20% of followers); Claude adds summary, themes, audience, location, languages, brands and a pitch idea. Works without AI. Moves Saved → Researched
 - ⬜ Personal page per person (profile snapshot + rate card + tips) and a draft first message (never auto-sent), with view and sign-up tracking
 - ⬜ Automation: bulk re-run, CSV import, auto-delete people with no reply after 90 days
 
