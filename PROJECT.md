@@ -199,6 +199,8 @@ Cloud Scheduler ──> daily insights refresh, payment reminders
 | `users/{uid}/wrapped/{year}` | Wrapped: posts, reels, views, likes, comments, topReel {views, likes, comments, month, permalink}, months [{month, posts, views}], bestMonth, busiestDay, streakWeeks, persona. `users/{uid}.wrapped` {public}. Deleted on disconnect | 2 ✅ |
 | `users/{uid}/people/{id}` | Creator research (admin only): platform, handle, url, name, bio, followers, following, posts, links, recentPosts [{url, caption}], notes, status, source, createdAt, updatedAt, capturedAt. Id = `platform_handle` or a URL hash. Raw page text is never stored | Growth ✅ |
 | `users/{uid}/people/{id}.research` | niche, nicheSource (rules/ai), themes, summary, audience, location, languages, brands, pitch, emails (public only), rate {deliverable, assumedViews, low, fair, high}, sources (pages read), usedAi, researchedAt. Fetched page text is never stored | Growth ✅ |
+| `users/{uid}/people/{id}.page` | slug, createdAt, views, clicks, lastViewAt, signedUpAt; `optedOut` true once they remove their page | Growth ✅ |
+| `personalPages/{slug}` | uid, personId, createdAt. Maps a public page link to the saved person; deleted when the page is turned off, removed or the person is deleted | Growth ✅ |
 | `captureTokens/{sha256(key)}` | uid, email, createdAt. Extension key, hash only; `users/{uid}.captureTokenHash` points to the current one | Growth ✅ |
 | `igAccounts/{igUserId}` | uid (one Instagram account ↔ one user; webhooks use it) | 2 ✅ |
 | `oauthStates/{state}` | uid, expireAt (TTL) | 2 ✅ |
@@ -240,6 +242,8 @@ src/
     wrapped/                   yearly Wrapped: config (copy, personas), compute, story slides, sync, store, demo
     people/                    creator research: url (link → platform/handle), count, extract (page → profile), person (merge), list, store, tokens (extension keys),
                                rules (niche, hashtags, emails, rate guess), html (page reader), ai-research (Claude), research (pipeline)
+    outreach/                  personal pages and first messages: config (tips, copy), page (public view, no notes/emails), message (drafts), slug, store
+    server/origin.ts           this site's address for copyable links
     server/safe-fetch.ts       fetch public pages only (blocks internal IPs on every redirect, time and size limits)
     server/admin.ts            ADMIN_EMAILS check for /admin and the extension
     inbox/                     (Phase 3) filters, categoriser, deal extractor
@@ -318,7 +322,7 @@ firestore.rules                deny-all client rules
 - ✅ Dashboard `/admin` for `ADMIN_EMAILS`: add by link, people list with status filter and search, person page with status, notes and delete, see D14
 - ✅ Chrome extension `extension/`: one-click save of the open profile (Instagram, YouTube, X, LinkedIn, any site), right-click save link or page, per-admin key made in `/admin`
 - ✅ Research job: "Run research" on a person reads their bio, captions (Instagram's automatic image descriptions removed) and up to 2 public links (website, Linktree; safe fetch, public IPs only), then rules give niche, content hashtags, public emails and a one-Reel rate guess (1,000+ followers, views assumed at 20% of followers); Claude adds summary, themes, audience, location, languages, brands and a pitch idea. Works without AI. Moves Saved → Researched
-- ⬜ Personal page per person (profile snapshot + rate card + tips) and a draft first message (never auto-sent), with view and sign-up tracking
+- ✅ Personal page `/p/<12-char random code>` (noindex, link only): snapshot, rate card from assumed views (1,000+ followers, Instagram/YouTube), 3 tips (size, niche, scam safety), CTA to media kit and brand check, "Remove this page" (opt-out: link deleted, status Dropped, never remade). Dashboard: Make page / Turn off, copyable DM + email drafts (never auto-sent), "mark as contacted", views, clicks, last seen, sign-up (page code kept in sessionStorage and sent with sign-in). See D15
 - ⬜ Automation: bulk re-run, CSV import, auto-delete people with no reply after 90 days
 
 ### Phase 3: Inbox + Insights (paid)
@@ -357,6 +361,7 @@ firestore.rules                deny-all client rules
 | D9 | Build Instagram features now in Meta development mode with tester accounts; register the business in parallel (planned name: Nexus Tech Pvt. Ltd., not yet registered, so don't use it publicly yet) | Business verification is needed only to go live for all creators | 2026-09-27 |
 | D13 | Creator Wrapped as the first growth loop: creators make a yearly recap from their own connected account, share it as a Story, and each public page asks viewers to make their own. No pages about other people, no scraping | Opt-in data only (Meta terms, DPDP); December is recap season and Instagram has none; brings creators into Instagram connect, media kit and rate card | 2026-11-21 |
 | D14 | Creator research tool for finding first users: admin-only dashboard plus a Chrome extension that saves a public profile only when the admin clicks (no background crawling, no auto-messages). Stores public profile fields and our notes, never raw page text. Narrows D7 and D13: they still hold for creator-facing features | Fast way to build a first-user pipeline without Meta APIs. Owner accepts the platform-terms risk to their own account. Indian creators first, so GDPR is out of scope for now | 2026-11-23 |
+| D15 | Personal pages are rules-only (no AI), link-only with a random code, show only public numbers and our estimate, and have a one-tap "Remove this page" that also stops outreach. First messages are drafts the admin sends by hand | Works when AI is down; can't be guessed or found by search; opt-out is instant and respected; matches "never auto-send" | 2026-11-23 |
 | D8 | *Open:* model for bulk comment sorting | Sonnet for deal analysis; a cheaper model may be enough for sorting. Decide with real cost data in Phase 3 | pending |
 
 ---
